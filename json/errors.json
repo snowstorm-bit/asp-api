@@ -1,22 +1,36 @@
 {
-  "field": {
+  "fields": {
     "username": {
-      "empty_or_white_spaces": "error.field.username.empty_or_white_spaces",
-      "length": "error.field.username.length"
+      "empty_or_white_spaces": "error.fields.username.empty_or_white_spaces",
+      "length": "error.fields.username.length"
     },
     "email": {
-      "already_taken": "error.field.email.already_taken",
-      "empty_or_white_spaces": "error.field.email.empty_or_white_spaces",
-      "length_exceeded": "error.field.email.length_exceeded",
-      "not_found": "error.field.email.not_found"
+      "already_taken": "error.fields.email.already_taken",
+      "empty_or_white_spaces": "error.fields.email.empty_or_white_spaces",
+      "length_exceeded": "error.fields.email.length_exceeded",
+      "not_found": "error.fields.email.not_found"
     },
     "password": {
-      "empty_or_white_spaces": "error.field.password.empty_or_white_spaces",
-      "length": "error.field.password.length",
-      "no_number": "error.field.password.no_number",
-      "no_symbol": "error.field.password.no_symbol",
-      "no_uppercase_letter": "error.field.password.min_length",
-      "invalid": "error.field.password.invalid"
+      "empty_or_white_spaces": "error.fields.password.empty_or_white_spaces",
+      "length": "error.fields.password.length",
+      "no_number": "error.fields.password.no_number",
+      "no_symbol": "error.fields.password.no_symbol",
+      "no_uppercase_letter": "error.fields.password.min_length",
+      "invalid": "error.fields.password.invalid"
+    },
+    "place": {
+      "title": {
+        "empty_or_white_spaces": "error.fields.place.title.empty_or_white_spaces",
+        "length": "error.fields.place.title.length"
+      },
+      "description": {
+        "empty_or_white_spaces": "error.fields.place.description.empty_or_white_spaces",
+        "length": "error.fields.place.description.length"
+      },
+      "steps": {
+        "empty_or_white_spaces": "error.fields.place.steps.empty_or_white_spaces",
+        "length": "error.fields.place.steps.length"
+      }
     }
   },
   "registration": "error.registration",

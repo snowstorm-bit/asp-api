@@ -21,7 +21,7 @@ exports.register = async (req, res, next) => {
         });
 
         if (result !== null) {
-            const err = new Error(error.field.email.already_taken);
+            const err = new Error(error.fields.email.already_taken);
             err.statusCode = 422;
             throw err;
         }
@@ -69,13 +69,13 @@ exports.login = async (req, res, next) => {
         });
 
         if (result === null) {
-            const err = new Error(error.field.email.not_found);
+            const err = new Error(error.fields.email.not_found);
             err.statusCode = 422;
             throw err;
         }
 
         if (!bcrypt.compareSync(`${ req.body.password }`, result.password)) {
-            const err = new Error(error.field.password.invalid);
+            const err = new Error(error.fields.password.invalid);
             err.statusCode = 422;
         }
 

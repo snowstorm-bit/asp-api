@@ -27,9 +27,9 @@ module.exports = sequelize => {
                 validate: {
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.field.username.empty_or_white_spaces, 422);
-                        } else if (!validation.validateLength(value, usernameMinLength, usernameMaxLength)) {
-                            throwError(error.field.username.length, 422);
+                            throwError(error.fields.username.empty_or_white_spaces, 422);
+                        } else if (!validation.validateRange(value.length, usernameMinLength, usernameMaxLength)) {
+                            throwError(error.fields.username.length, 422);
                         }
                     }
                 },
@@ -49,8 +49,8 @@ module.exports = sequelize => {
                 validate: {
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.field.email.empty_or_white_spaces, 422);
-                        } else if (!validation.validateMaxLength(value, emailMaxLength)) {
+                            throwError(error.fields.email.empty_or_white_spaces, 422);
+                        } else if (!validation.validateMaxValue(value.length, emailMaxLength)) {
                         }
                     }
                 },
@@ -69,20 +69,20 @@ module.exports = sequelize => {
                 validate: {
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throw new Error(error.field.username.empty_or_white_spaces);
-                        } else if (!validation.validateLength(value, passwordMinLength, passwordMaxLength)) {
-                            throw new Error(error.field.password.length);
+                            throw new Error(error.fields.username.empty_or_white_spaces);
+                        } else if (!validation.validateRange(value.length, passwordMinLength, passwordMaxLength)) {
+                            throw new Error(error.fields.password.length);
                         } else {
                             if (value.match('[0-9]') === null) {
-                                throw new Error(error.field.password.no_number);
+                                throw new Error(error.fields.password.no_number);
                             }
 
                             if (value.match('[#?!@$%^&*-]') === null) {
-                                throw new Error(error.field.password.no_symbol);
+                                throw new Error(error.fields.password.no_symbol);
                             }
 
                             if (value.match('[A-Z]') === null) {
-                                throw new Error(error.field.password.no_uppercase_letter);
+                                throw new Error(error.fields.password.no_uppercase_letter);
                             }
                         }
                     }
@@ -91,7 +91,7 @@ module.exports = sequelize => {
             accessLevel: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
-                field: 'access_level'
+                fields: 'access_level'
             }
         },
         {
