@@ -12,6 +12,8 @@ const emailMaxLength = 50;
 const passwordMinLength = 6;
 const passwordMaxLength = 12;
 
+const userInvalidStatusCode = 422;
+
 module.exports = sequelize => {
     User.init(
         {
@@ -27,9 +29,9 @@ module.exports = sequelize => {
                 validate: {
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.field.username.empty_or_white_spaces, 422);
+                            throwError(error.field.username.empty_or_white_spaces, userInvalidStatusCode);
                         } else if (!validation.validateLength(value, usernameMinLength, usernameMaxLength)) {
-                            throwError(error.field.username.length, 422);
+                            throwError(error.field.username.length, userInvalidStatusCode);
                         }
                     }
                 },
@@ -49,8 +51,13 @@ module.exports = sequelize => {
                 validate: {
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.field.email.empty_or_white_spaces, 422);
+                            throwError(error.field.email.empty_or_white_spaces, userInvalidStatusCode);
                         } else if (!validation.validateMaxLength(value, emailMaxLength)) {
+                            throwError(error.field.email.length_exceeded, userInvalidStatusCode);
+                        } else {
+                            if (!value.match("\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*")) {
+                                throwError(error.field.email.invalid, userInvalidStatusCode);
+                            }
                         }
                     }
                 },
@@ -69,20 +76,21 @@ module.exports = sequelize => {
                 validate: {
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throw new Error(error.field.username.empty_or_white_spaces);
+                            throwError(error.field.password.empty_or_white_spaces, userInvalidStatusCode);
                         } else if (!validation.validateLength(value, passwordMinLength, passwordMaxLength)) {
+                            throwError(error.field.password.length, userInvalidStatusCode);
                             throw new Error(error.field.password.length);
                         } else {
                             if (value.match('[0-9]') === null) {
-                                throw new Error(error.field.password.no_number);
+                                throwError(error.field.password.no_number, userInvalidStatusCode);
                             }
 
                             if (value.match('[#?!@$%^&*-]') === null) {
-                                throw new Error(error.field.password.no_symbol);
+                                throwError(error.field.password.no_symbol, userInvalidStatusCode);
                             }
 
                             if (value.match('[A-Z]') === null) {
-                                throw new Error(error.field.password.no_uppercase_letter);
+                                throwError(error.field.password.no_uppercase_letter, userInvalidStatusCode);
                             }
                         }
                     }

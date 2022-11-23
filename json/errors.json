@@ -8,6 +8,7 @@
       "already_taken": "error.field.email.already_taken",
       "empty_or_white_spaces": "error.field.email.empty_or_white_spaces",
       "length_exceeded": "error.field.email.length_exceeded",
+      "invalid": "error.field.email.invalid",
       "not_found": "error.field.email.not_found"
     },
     "password": {
