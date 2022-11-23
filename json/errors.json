@@ -1,0 +1,24 @@
+{
+  "field": {
+    "username": {
+      "empty_or_white_spaces": "error.field.username.empty_or_white_spaces",
+      "length": "error.field.username.length"
+    },
+    "email": {
+      "already_taken": "error.field.email.already_taken",
+      "empty_or_white_spaces": "error.field.email.empty_or_white_spaces",
+      "length_exceeded": "error.field.email.length_exceeded",
+      "not_found": "error.field.email.not_found"
+    },
+    "password": {
+      "empty_or_white_spaces": "error.field.password.empty_or_white_spaces",
+      "length": "error.field.password.length",
+      "no_number": "error.field.password.no_number",
+      "no_symbol": "error.field.password.no_symbol",
+      "no_uppercase_letter": "error.field.password.min_length",
+      "invalid": "error.field.password.invalid"
+    }
+  },
+  "registration": "error.registration",
+  "login": "error.login"
+}
