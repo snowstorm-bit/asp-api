@@ -22,5 +22,7 @@ db.sequelize = sequelize;
 
 db.Users = require('./models/user')(db.sequelize);
 db.Places = require('./models/place')(db.sequelize);
+db.Climbs = require('./models/climb')(db.sequelize);
+db.PlaceClimbs = require('./models/placeClimbs')(db.sequelize);
 
 module.exports = db;

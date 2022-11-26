@@ -1,6 +1,6 @@
 'use strict';
 
-const { Places } = require('../database');
+const { Climbs, Places } = require('../database');
 const { throwError, status, manageError } = require('../utils/utils');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
@@ -18,30 +18,35 @@ exports.getForCreate = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try {
-        let place = await Places.create(
+        // let result = await Places.findOne({
+        //     attributes: ['id', 'title', 'user_id'],
+        //     where: {
+        //         title: req.params.title
+        //     }
+        // });
+
+        let climb = await Climbs.create(
             {
                 title: req.body.title,
                 description: req.body.description,
-                steps: req.body.steps,
-                latitude: req.body.latitude,
-                longitude: req.body.longitude,
-                userId: req.user.id
+                style: req.body.style,
+                difficultyLevel: req.body.difficultyLevel
             }
         );
 
-        await place.save();
+        await climb.save();
 
         res.status(201).json({
-            code: successes.place.create,
+            code: successes.climb.create,
             status: status.success,
             result: {
-                title: place.title
+                title: climb.title
             }
         });
     } catch (err) {
         next(manageError(err, {
-            code: errors.routes.place.create,
-            cause: 'place_create'
+            code: errors.routes.climb.create,
+            cause: 'climb_create'
         }));
     }
 };
@@ -68,9 +73,8 @@ exports.update = async (req, res, next) => {
         let place = await result.set({
             title: req.body.title,
             description: req.body.description,
-            steps: req.body.steps,
-            latitude: req.body.latitude,
-            longitude: req.body.longitude
+            style: req.body.style,
+            difficultyLevel: req.body.difficultyLevel
         });
 
         await place.save();

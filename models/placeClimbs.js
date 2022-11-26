@@ -11,25 +11,30 @@ module.exports = sequelize => {
             placeId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
-                field: 'place_id',
+                underscored: true,
                 references: {
                     model: Place,
                     key: 'id',
                     as: 'place_id'
-                }
+                },
+                onDelete: 'CASCADE'
             },
             climbId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
-                field: 'climb_id',
+                underscored: true,
                 references: {
                     model: Climb,
                     key: 'id',
                     as: 'climb_id'
                 }
             }
+        },
+        {
+            sequelize,
+            timestamps: true,
+            underscored: true
         }
     );
-
     return PlaceClimbs;
 };

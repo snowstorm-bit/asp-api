@@ -1,6 +1,7 @@
 'use strict';
 const { DataTypes } = require('sequelize');
 const Climb = require('../classes/climb');
+const Place = require('../classes/place');
 
 const { throwError } = require('../utils/utils');
 const validation = require('../utils/validation');
@@ -26,7 +27,6 @@ module.exports = sequelize => {
             title: {
                 type: DataTypes.STRING(titleMaxLength),
                 allowNull: false,
-                unique: true,
                 validate: {
                     len: {
                         args: [titleMinLength, titleMaxLength],
@@ -70,7 +70,7 @@ module.exports = sequelize => {
                 }
             },
             difficultyLevel: {
-                type: DataTypes.NUMBER(1, 2),
+                type: DataTypes.NUMBER({ decimals: 2 }),
                 allowNull: false,
                 validate: {
                     isDecimal: {
@@ -92,7 +92,7 @@ module.exports = sequelize => {
                         }
                     }
                 },
-                field: 'difficulty_level'
+                underscored: true
             },
             rate: {
                 type: DataTypes.INTEGER(1),
@@ -111,7 +111,7 @@ module.exports = sequelize => {
             },
             imgUrls: {
                 type: DataTypes.TEXT(),
-                allowNull: false,
+                // allowNull: false,
                 get(value) {
                     return value.split(';');
                 },
@@ -120,7 +120,7 @@ module.exports = sequelize => {
                         return value.join(';');
                     }
                 },
-                field: 'img_urls'
+                underscored: true
             }
         },
         {

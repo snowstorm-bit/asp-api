@@ -102,7 +102,7 @@ module.exports = sequelize => {
                 references: {
                     model: User,
                     key: 'id',
-                    as: 'user_id'
+                    underscored: true
                 },
                 onDelete: 'CASCADE'
             }

@@ -4,5 +4,9 @@
   "place": {
     "create": "successes.create",
     "update": "successes.update"
+  },
+  "climb": {
+    "create": "successes.create",
+    "update": "successes.update"
   }
 }

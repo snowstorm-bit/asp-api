@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/userRoutes');
 const placeRoutes = require('./routes/placeRoutes');
+const climbRoutes = require('./routes/climbRoutes');
 
 const database = require('./database');
 const { status } = require('./utils/utils');
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 
 app.use('/user', userRoutes);
 app.use('/place', placeRoutes);
+app.use('/climb', climbRoutes);
 app.use((req, res, next) =>
     res.status(404).json({ message: 'Route introuvable !' }));
 
