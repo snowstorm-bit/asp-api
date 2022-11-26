@@ -1,4 +1,5 @@
 'use strict';
+
 const { toString } = require('../utils/utils');
 
 exports.validateEmptyOrWhiteSpace = value => {
@@ -6,12 +7,12 @@ exports.validateEmptyOrWhiteSpace = value => {
     return value.length >= 1;
 };
 
-exports.validateMaxLength = (value, max) => {
+exports.validateMaxValue = (value, max) => {
     toString(value);
-    return value.length <= max;
+    return value <= max;
 };
 
-exports.validateLength = (value, min, max) => {
+exports.validateRange = (value, min, max) => {
     toString(value);
-    return value.length >= min && value.length <= max;
+    return value >= min && value <= max;
 };

@@ -1,4 +1,8 @@
 {
   "register": "successes.register",
-  "login": "successes.login"
+  "login": "successes.login",
+  "place": {
+    "create": "successes.create",
+    "update": "successes.update"
+  }
 }

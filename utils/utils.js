@@ -1,29 +1,31 @@
 'use strict';
 
 const bcrypt = require('bcrypt');
-const error = require('../json/errors.json');
+const errors = require('../json/errors.json');
 
-module.exports.throwError = (error, cause = null, code = null, isModelError = true) => {
-    let err = isModelError
-        ? new Error(error)
-        : { code: error };
+module.exports.throwError = (code, cause = null, statusCode = null, isModelValidationError = true) => {
+    let err = isModelValidationError
+        ? new Error(code)
+        : { code: code };
 
     if (cause !== null) {
         err.cause = cause;
     }
 
-    if (code !== null) {
-        err.statusCode = code;
+    if (statusCode !== null) {
+        err.statusCode = statusCode;
     }
 
     throw err;
 };
 
-let updateIfAllowNullErrorMessage = (message, validatorKey, cause) => {
+let updateErrorIfNecessary = (model, errorCode, validatorKey, cause) => {
     if (validatorKey === 'is_null') {
-        return error.cause[cause].is_null;
+        return errors[model][cause].is_null;
+    } else if (validatorKey === 'not_unique') {
+        return errors[model].unique_constraint;
     }
-    return message;
+    return errorCode;
 };
 
 module.exports.manageError = (err, globalError) => {
@@ -31,11 +33,16 @@ module.exports.manageError = (err, globalError) => {
         codes: {}
     };
 
+    // console.log(err);
+
     // Manage errors return by sequelize validation
     if ('errors' in err) {
         errorToManage.statusCode = 422;
         err.errors.forEach(errToManage => {
+            // console.log(errToManage);
+
             let cause = errToManage.path;
+            let model = errToManage.instance.constructor.name.toString().toLowerCase();
 
             // When validation has many error messages in the error message
             if (errToManage.message.includes(';')) {
@@ -43,16 +50,24 @@ module.exports.manageError = (err, globalError) => {
                 let errorCodes = errToManage.message.split(';');
 
                 errorCodes.forEach(errorCode =>
-                    errorToManage.codes[cause].push(updateIfAllowNullErrorMessage(
+                    errorToManage.codes[cause].push(updateErrorIfNecessary(
+                        model,
                         errorCode,
                         errToManage.validatorKey,
-                        cause)
-                    ));
+                        cause))
+                );
             } else {
-                errorToManage.codes[cause] = updateIfAllowNullErrorMessage(
+                let error = updateErrorIfNecessary(
+                    model,
                     errToManage.message,
                     errToManage.validatorKey,
                     cause);
+
+                if (typeof error === 'string') {
+                    errorToManage.codes[cause] = error;
+                } else {
+                    errorToManage.codes[error.cause] = error.code;
+                }
             }
         });
     } else if ('code' in err) { // manage custom error thrown

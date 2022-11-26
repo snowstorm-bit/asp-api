@@ -3,6 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/userRoutes');
+const placeRoutes = require('./routes/placeRoutes');
 
 const database = require('./database');
 const { status } = require('./utils/utils');
@@ -21,14 +22,15 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(userRoutes);
-
-app.use((req, res, next) => res.status(404).json({ message: 'Route introuvable !' }));
+app.use('/user', userRoutes);
+app.use('/place', placeRoutes);
+app.use((req, res, next) =>
+    res.status(404).json({ message: 'Route introuvable !' }));
 
 // Manage error
 app.use((error, req, res, next) =>
     res.status(error.statusCode || 500).json({
-        codes: error.codes || { 'fdf': 'dfadf' },
+        codes: error.codes,
         status: status.error
     }));
 

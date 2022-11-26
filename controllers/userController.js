@@ -12,16 +12,16 @@ dotenv.config();
 
 exports.register = async (req, res, next) => {
     try {
-        let result = await Users.findOne({
-            attributes: ['username', 'password'],
-            where: {
-                email: req.body.email
-            }
-        });
-
-        if (result !== null) {
-            throwError(errors.field.email.already_taken, 'email', 422, false);
-        }
+        // let result = await Users.findOne({
+        //     attributes: ['username', 'password'],
+        //     where: {
+        //         email: req.body.email
+        //     }
+        // });
+        //
+        // if (result !== null) {
+        //     throwError(errors.user.email.already_taken, 'email', 422, false);
+        // }
 
         let user = await Users.create(
             {
@@ -32,7 +32,7 @@ exports.register = async (req, res, next) => {
             }
         );
 
-        user.save();
+        await user.save();
 
         res.status(201).json({
             code: successes.register,
@@ -69,11 +69,11 @@ exports.login = async (req, res, next) => {
         });
 
         if (user === null) {
-            throwError(errors.field.email.not_found, 'email', 422, false);
+            throwError(errors.user.email.not_found, 'email', 422, false);
         }
 
         if (!bcrypt.compareSync(`${ req.body.password }`, user.password)) {
-            throwError(errors.field.password.invalid, 'password', 422, false);
+            throwError(errors.user.password.invalid, 'password', 422, false);
         }
 
         res.status(200).json({
@@ -85,8 +85,8 @@ exports.login = async (req, res, next) => {
             },
             token: jwt.sign(
                 {
-                    email: user.email,
                     id: user.id,
+                    email: user.email,
                     access_level: user.accessLevel
                 },
                 process.env.SECRET_JTW_KEY,
