@@ -12,7 +12,4 @@ exports.validateMaxValue = (value, max) => {
     return value <= max;
 };
 
-exports.validateRange = (value, min, max) => {
-    toString(value);
-    return value >= min && value <= max;
-};
+exports.validateRange = (value, min, max) => value >= min && value <= max;

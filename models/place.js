@@ -3,7 +3,7 @@ const { DataTypes } = require('sequelize');
 const Place = require('../classes/place');
 const User = require('../classes/user');
 
-const { throwError, hashPassword } = require('../utils/utils');
+const { throwError } = require('../utils/utils');
 const validation = require('../utils/validation');
 const errors = require('../json/errors.json');
 
