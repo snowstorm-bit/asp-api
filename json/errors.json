@@ -1,0 +1,35 @@
+{
+  "field": {
+    "username": {
+      "is_null": "errors.fields.username.is_null",
+      "empty_or_white_spaces": "errors.fields.username.empty_or_white_spaces",
+      "length": "errors.fields.username.length"
+    },
+    "email": {
+      "already_taken": "errors.fields.email.already_taken",
+      "not_found": "errors.fields.email.not_found",
+      "is_null": "errors.fields.email.is_null",
+      "empty_or_white_spaces": "errors.fields.email.empty_or_white_spaces",
+      "length_exceeded": "errors.fields.email.length_exceeded",
+      "invalid": "errors.fields.email.invalid"
+    },
+    "password": {
+      "is_null": "errors.fields.password.is_null",
+      "empty_or_white_spaces": "errors.fields.password.empty_or_white_spaces",
+      "length": "errors.fields.password.length",
+      "no_number": "errors.fields.password.no_number",
+      "no_symbol": "errors.fields.password.no_symbol",
+      "no_uppercase_letter": "errors.fields.password.no_uppercase_letter",
+      "invalid": "errors.fields.password.invalid"
+    }
+  },
+  "routes": {
+    "register": "errors.routes.register",
+    "login": "errors.routes.login"
+  },
+  "auth": {
+    "login_required": "errors.auth.login_required",
+    "session_expired": "errors.auth.session_expired",
+    "unauthorized": "errors.auth.session_unauthorized"
+  }
+}
