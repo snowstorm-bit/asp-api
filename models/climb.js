@@ -1,6 +1,6 @@
 'use strict';
 const { DataTypes } = require('sequelize');
-const Climb = require('../classes/place');
+const Climb = require('../classes/climb');
 
 const { throwError } = require('../utils/utils');
 const validation = require('../utils/validation');

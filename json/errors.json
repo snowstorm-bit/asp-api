@@ -88,6 +88,13 @@
       "range": "errors.fields.climb.rate.range"
     }
   },
+  "place_climbs": {
+    "rate": {
+      "not_int": "errors.fields.climb.rate.not_int",
+      "empty_or_white_spaces": "errors.fields.climb.rate.empty_or_white_spaces",
+      "range": "errors.fields.climb.rate.range"
+    }
+  },
   "routes": {
     "register": "errors.routes.register",
     "login": "errors.routes.login",
