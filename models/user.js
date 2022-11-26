@@ -24,23 +24,21 @@ module.exports = sequelize => {
                 allowNull: false
             },
             username: {
-                type: DataTypes.STRING(usernameMaxLength),
+                type: DataTypes.STRING(emailMaxLength),
                 allowNull: false,
                 validate: {
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.field.username.empty_or_white_spaces, userInvalidStatusCode);
+                            throwError(error.field.username.empty_or_white_spaces);
                         } else if (!validation.validateLength(value, usernameMinLength, usernameMaxLength)) {
-                            throwError(error.field.username.length, userInvalidStatusCode);
+                            throwError(error.field.username.length);
                         }
                     }
                 },
                 set(value) {
                     if (typeof value !== 'string')
                         value = String(value);
-
                     value.trim();
-
                     this.setDataValue('username', value.toLowerCase());
                 }
             },
@@ -49,24 +47,22 @@ module.exports = sequelize => {
                 allowNull: false,
                 unique: true,
                 validate: {
+                    isEmail: {
+                        args: true,
+                        msg: error.field.email.invalid
+                    },
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.field.email.empty_or_white_spaces, userInvalidStatusCode);
+                            throwError(error.field.email.empty_or_white_spaces);
                         } else if (!validation.validateMaxLength(value, emailMaxLength)) {
-                            throwError(error.field.email.length_exceeded, userInvalidStatusCode);
-                        } else {
-                            if (!value.match("\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*")) {
-                                throwError(error.field.email.invalid, userInvalidStatusCode);
-                            }
+                            throwError(error.field.email.length_exceeded);
                         }
                     }
                 },
                 set(value) {
                     if (typeof value !== 'string')
                         value = String(value);
-
                     value.trim();
-
                     this.setDataValue('email', value.toLowerCase());
                 }
             },
@@ -75,22 +71,29 @@ module.exports = sequelize => {
                 allowNull: false,
                 validate: {
                     isValid(value) {
-                        if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.field.password.empty_or_white_spaces, userInvalidStatusCode);
-                        } else if (!validation.validateLength(value, passwordMinLength, passwordMaxLength)) {
-                            throwError(error.field.password.length, userInvalidStatusCode);
-                            throw new Error(error.field.password.length);
+                        // A copy of the is necessary since, when validating if value if empty or white space, we trim it  
+                        let valueToValidate = value;
+                        if (!validation.validateEmptyOrWhiteSpace(valueToValidate)) {
+                            throwError(error.field.password.empty_or_white_spaces);
+                        } else if (!validation.validateLength(valueToValidate, passwordMinLength, passwordMaxLength)) {
+                            throwError(error.field.password.length);
                         } else {
+                            let errorToThrow = '';
                             if (value.match('[0-9]') === null) {
-                                throwError(error.field.password.no_number, userInvalidStatusCode);
+                                errorToThrow += error.field.password.no_number + ';';
                             }
-
                             if (value.match('[#?!@$%^&*-]') === null) {
-                                throwError(error.field.password.no_symbol, userInvalidStatusCode);
+                                errorToThrow += error.field.password.no_symbol + ';';
+                            }
+                            if (value.match('[A-Z]') === null) {
+                                errorToThrow += error.field.password.no_uppercase_letter;
                             }
 
-                            if (value.match('[A-Z]') === null) {
-                                throwError(error.field.password.no_uppercase_letter, userInvalidStatusCode);
+                            if (errorToThrow.length > 0) {
+                                if (errorToThrow.indexOf(';') === errorToThrow.length - 1) {
+                                    errorToThrow = errorToThrow.slice(0, -1);
+                                }
+                                throwError(errorToThrow);
                             }
                         }
                     }
@@ -106,8 +109,8 @@ module.exports = sequelize => {
             sequelize,
             timestamps: true,
             hooks: {
-                beforeCreate: record => this.setDataValue('password', hashPassword(record.password)),
-                beforeUpdate: record => this.setDataValue('password', hashPassword(record.password))
+                beforeCreate: record => this.password = hashPassword(record.password),
+                beforeUpdate: record => this.password = hashPassword(record.password)
             }
         }
     );

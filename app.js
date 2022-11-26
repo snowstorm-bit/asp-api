@@ -28,13 +28,12 @@ app.use((req, res, next) => res.status(404).json({ message: 'Route introuvable !
 // Manage error
 app.use((error, req, res, next) =>
     res.status(error.statusCode || 500).json({
-        message: error.message,
-        status: status.error,
-        data: error.data || {}
+        codes: error.codes || { 'fdf': 'dfadf' },
+        status: status.error
     }));
 
-app.listen(8081, async () => {
-    console.log('Connection à la BD ouverte sur le port %s ', 8081);
+app.listen(8080, async () => {
+    console.log('Connection à la BD ouverte sur le port %s ', 8080);
 
     await database.sequelize.sync();
 });

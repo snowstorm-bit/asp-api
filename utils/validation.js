@@ -15,5 +15,3 @@ exports.validateLength = (value, min, max) => {
     toString(value);
     return value.length >= min && value.length <= max;
 };
-
-exports.errors = {};

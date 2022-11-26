@@ -1,25 +1,35 @@
 {
   "field": {
     "username": {
-      "empty_or_white_spaces": "error.field.username.empty_or_white_spaces",
-      "length": "error.field.username.length"
+      "is_null": "errors.fields.username.is_null",
+      "empty_or_white_spaces": "errors.fields.username.empty_or_white_spaces",
+      "length": "errors.fields.username.length"
     },
     "email": {
-      "already_taken": "error.field.email.already_taken",
-      "empty_or_white_spaces": "error.field.email.empty_or_white_spaces",
-      "length_exceeded": "error.field.email.length_exceeded",
-      "invalid": "error.field.email.invalid",
-      "not_found": "error.field.email.not_found"
+      "already_taken": "errors.fields.email.already_taken",
+      "not_found": "errors.fields.email.not_found",
+      "is_null": "errors.fields.email.is_null",
+      "empty_or_white_spaces": "errors.fields.email.empty_or_white_spaces",
+      "length_exceeded": "errors.fields.email.length_exceeded",
+      "invalid": "errors.fields.email.invalid"
     },
     "password": {
-      "empty_or_white_spaces": "error.field.password.empty_or_white_spaces",
-      "length": "error.field.password.length",
-      "no_number": "error.field.password.no_number",
-      "no_symbol": "error.field.password.no_symbol",
-      "no_uppercase_letter": "error.field.password.min_length",
-      "invalid": "error.field.password.invalid"
+      "is_null": "errors.fields.password.is_null",
+      "empty_or_white_spaces": "errors.fields.password.empty_or_white_spaces",
+      "length": "errors.fields.password.length",
+      "no_number": "errors.fields.password.no_number",
+      "no_symbol": "errors.fields.password.no_symbol",
+      "no_uppercase_letter": "errors.fields.password.no_uppercase_letter",
+      "invalid": "errors.fields.password.invalid"
     }
   },
-  "registration": "error.registration",
-  "login": "error.login"
+  "routes": {
+    "register": "errors.routes.register",
+    "login": "errors.routes.login"
+  },
+  "auth": {
+    "login_required": "errors.auth.login_required",
+    "session_expired": "errors.auth.session_expired",
+    "unauthorized": "errors.auth.session_unauthorized"
+  }
 }

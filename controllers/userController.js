@@ -4,10 +4,10 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const { manageError, status } = require('../utils/utils');
+const { throwError, manageError, status, userAccessLevel } = require('../utils/utils');
 const { Users } = require('../database');
-const error = require('../json/errors.json');
-
+const errors = require('../json/errors.json');
+const successes = require('../json/successes.json');
 dotenv.config();
 
 exports.register = async (req, res, next) => {
@@ -15,15 +15,12 @@ exports.register = async (req, res, next) => {
         let result = await Users.findOne({
             attributes: ['username', 'password'],
             where: {
-                email: req.body.email,
-                access_level: 1
+                email: req.body.email
             }
         });
 
         if (result !== null) {
-            const err = new Error(error.field.email.already_taken);
-            err.statusCode = 422;
-            throw err;
+            throwError(errors.field.email.already_taken, 'email', 422, false);
         }
 
         let user = await Users.create(
@@ -31,71 +28,71 @@ exports.register = async (req, res, next) => {
                 username: req.body.username,
                 email: req.body.email,
                 password: req.body.password,
-                accessLevel: 1
+                accessLevel: userAccessLevel.user
             }
         );
 
         user.save();
 
+        let userPayload = {
+            email: user.email,
+            access_level: user.accessLevel
+        };
+
         res.status(201).json({
-            message: 'success.registration',
+            code: successes.register,
             status: status.success,
+            result: userPayload,
             token: jwt.sign(
-                {
-                    username: req.body.username,
-                    access_level: 1
-                },
+                userPayload,
                 process.env.SECRET_JTW_KEY,
-                {
-                    expiresIn: '1h'
-                }
+                { expiresIn: '1h' }
             )
         });
     } catch (err) {
-        if (typeof err !== 'string' && !('message' in err))
-            err.message = error.registration;
-        manageError(next, err);
+        next(manageError(err, {
+            code: errors.routes.register,
+            cause: 'register'
+        }));
     }
 };
 
 exports.login = async (req, res, next) => {
     try {
-        let result = await Users.findOne({
+        let user = await Users.findOne({
             attributes: ['username', 'password'],
             where: {
-                username: req.body.username,
-                access_level: 1
+                username: req.body.username
             }
         });
 
-        if (result === null) {
-            const err = new Error(error.field.email.not_found);
-            err.statusCode = 422;
-            throw err;
+        if (user === null) {
+            throwError(errors.field.email.not_found, 'email', 422, false);
         }
 
-        if (!bcrypt.compareSync(`${ req.body.password }`, result.password)) {
-            const err = new Error(error.field.password.invalid);
-            err.statusCode = 422;
+        if (!bcrypt.compareSync(`${ req.body.password }`, user.password)) {
+            throwError(errors.field.password.invalid, 'password', 422, false);
         }
+
+        let userPayload = {
+            email: user.email,
+            access_level: user.accessLevel
+        };
 
         res.status(200).json({
-            message: 'success.login',
+            code: successes.login,
             status: status.success,
+            result: userPayload,
             token: jwt.sign(
-                {
-                    username: req.body.username,
-                    access_level: 1
-                },
+                userPayload,
                 process.env.SECRET_JTW_KEY,
-                {
-                    expiresIn: '1h'
-                }
+                { expiresIn: '1h' }
             )
         });
     } catch (err) {
-        if (typeof err !== 'string' && !('message' in err))
-            err.message = error.login;
-        manageError(next, err);
+        next(manageError(err, {
+            code: errors.routes.login,
+            cause: 'login'
+        }));
     }
 };
