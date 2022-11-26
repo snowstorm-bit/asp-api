@@ -12,8 +12,6 @@ const emailMaxLength = 50;
 const passwordMinLength = 6;
 const passwordMaxLength = 12;
 
-const userInvalidStatusCode = 422;
-
 module.exports = sequelize => {
     User.init(
         {

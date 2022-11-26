@@ -34,17 +34,19 @@ exports.register = async (req, res, next) => {
 
         user.save();
 
-        let userPayload = {
-            email: user.email,
-            access_level: user.accessLevel
-        };
-
         res.status(201).json({
             code: successes.register,
             status: status.success,
-            result: userPayload,
+            result: {
+                username: user.username,
+                access_level: user.accessLevel
+            },
             token: jwt.sign(
-                userPayload,
+                {
+                    email: user.email,
+                    id: user.id,
+                    access_level: user.accessLevel
+                },
                 process.env.SECRET_JTW_KEY,
                 { expiresIn: '1h' }
             )
@@ -60,9 +62,9 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     try {
         let user = await Users.findOne({
-            attributes: ['username', 'password'],
+            attributes: ['id', 'username', 'email', 'password'],
             where: {
-                username: req.body.username
+                email: req.body.email
             }
         });
 
@@ -74,17 +76,19 @@ exports.login = async (req, res, next) => {
             throwError(errors.fields.password.invalid, 'password', 422, false);
         }
 
-        let userPayload = {
-            email: user.email,
-            access_level: user.accessLevel
-        };
-
         res.status(200).json({
             code: successes.login,
             status: status.success,
-            result: userPayload,
+            result: {
+                username: user.username,
+                access_level: user.accessLevel
+            },
             token: jwt.sign(
-                userPayload,
+                {
+                    email: user.email,
+                    id: user.id,
+                    access_level: user.accessLevel
+                },
                 process.env.SECRET_JTW_KEY,
                 { expiresIn: '1h' }
             )
