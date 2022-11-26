@@ -14,7 +14,7 @@ module.exports = (req, res, next) => {
     const token = authHeader.split(' ')[1];
     let decodedToken;
     try {
-        decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        decodedToken = jwt.verify(token, process.env.SECRET_JTW_KEY);
     } catch (err) {
         err.statusCode = 401;
         throw err;
@@ -26,6 +26,5 @@ module.exports = (req, res, next) => {
     }
     // Passe le token décodé dans la requête pour pouvoir l'utiliser ailleurs
     req.user = decodedToken;
-    console.log('decodedToken', decodedToken);
     next();
 };

@@ -4,7 +4,7 @@ const User = require('../classes/user');
 
 const { throwError, hashPassword } = require('../utils/utils');
 const validation = require('../utils/validation');
-const error = require('../json/errors.json');
+const errors = require('../json/errors.json');
 
 const usernameMinLength = 3;
 const usernameMaxLength = 50;
@@ -22,22 +22,16 @@ module.exports = sequelize => {
                 allowNull: false
             },
             username: {
-                type: DataTypes.STRING(emailMaxLength),
+                type: DataTypes.STRING(usernameMaxLength),
                 allowNull: false,
                 validate: {
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.field.username.empty_or_white_spaces);
-                        } else if (!validation.validateRange(value, usernameMinLength, usernameMaxLength)) {
-                            throwError(error.field.username.length);
+                            throwError(errors.user.username.empty_or_white_spaces);
+                        } else if (!validation.validateRange(value.length, usernameMinLength, usernameMaxLength)) {
+                            throwError(errors.user.username.length);
                         }
                     }
-                },
-                set(value) {
-                    if (typeof value !== 'string')
-                        value = String(value);
-                    value.trim();
-                    this.setDataValue('username', value.toLowerCase());
                 }
             },
             email: {
@@ -45,23 +39,21 @@ module.exports = sequelize => {
                 allowNull: false,
                 unique: true,
                 validate: {
+                    isValid(value) {
+                        if (typeof value !== 'string')
+                            value = String(value);
+                        this.setDataValue('email', value.toLowerCase());
+
+                        if (!validation.validateEmptyOrWhiteSpace(value)) {
+                            throwError(errors.user.email.empty_or_white_spaces);
+                        } else if (!validation.validateMaxValue(value.length, emailMaxLength)) {
+                            throwError(errors.user.email.length_exceeded);
+                        }
+                    },
                     isEmail: {
                         args: true,
-                        msg: error.field.email.invalid
-                    },
-                    isValid(value) {
-                        if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.field.email.empty_or_white_spaces);
-                        } else if (!validation.validateMaxValue(value, emailMaxLength)) {
-                            throwError(error.field.email.length_exceeded);
-                        }
+                        msg: errors.user.email.invalid
                     }
-                },
-                set(value) {
-                    if (typeof value !== 'string')
-                        value = String(value);
-                    value.trim();
-                    this.setDataValue('email', value.toLowerCase());
                 }
             },
             password: {
@@ -72,19 +64,19 @@ module.exports = sequelize => {
                         // A copy of the is necessary since, when validating if value if empty or white space, we trim it  
                         let valueToValidate = value;
                         if (!validation.validateEmptyOrWhiteSpace(valueToValidate)) {
-                            throwError(error.field.password.empty_or_white_spaces);
-                        } else if (!validation.validateRange(valueToValidate, passwordMinLength, passwordMaxLength)) {
-                            throwError(error.field.password.length);
+                            throwError(errors.user.password.empty_or_white_spaces);
+                        } else if (!validation.validateRange(valueToValidate.length, passwordMinLength, passwordMaxLength)) {
+                            throwError(errors.user.password.length);
                         } else {
                             let errorToThrow = '';
                             if (value.match('[0-9]') === null) {
-                                errorToThrow += error.field.password.no_number + ';';
+                                errorToThrow += errors.user.password.no_number + ';';
                             }
                             if (value.match('[#?!@$%^&*-]') === null) {
-                                errorToThrow += error.field.password.no_symbol + ';';
+                                errorToThrow += errors.user.password.no_symbol + ';';
                             }
                             if (value.match('[A-Z]') === null) {
-                                errorToThrow += error.field.password.no_uppercase_letter;
+                                errorToThrow += errors.user.password.no_uppercase_letter;
                             }
 
                             if (errorToThrow.length > 0) {
@@ -93,23 +85,22 @@ module.exports = sequelize => {
                                 }
                                 throwError(errorToThrow);
                             }
+
+                            value.trim();
+                            this.setDataValue('password', hashPassword(value));
                         }
                     }
                 }
             },
             accessLevel: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.INTEGER(1),
                 allowNull: false,
                 field: 'access_level'
             }
         },
         {
             sequelize,
-            timestamps: true,
-            hooks: {
-                beforeCreate: record => this.password = hashPassword(record.password),
-                beforeUpdate: record => this.password = hashPassword(record.password)
-            }
+            timestamps: true
         }
     );
 

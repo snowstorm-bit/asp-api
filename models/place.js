@@ -1,10 +1,11 @@
 'use strict';
 const { DataTypes } = require('sequelize');
 const Place = require('../classes/place');
+const User = require('../classes/user');
 
-const { throwError } = require('../utils/utils');
+const { throwError, hashPassword } = require('../utils/utils');
 const validation = require('../utils/validation');
-const error = require('../json/errors.json');
+const errors = require('../json/errors.json');
 
 const titleMinLength = 3;
 const titleMaxLength = 50;
@@ -29,34 +30,30 @@ module.exports = sequelize => {
             title: {
                 type: DataTypes.STRING(titleMaxLength),
                 allowNull: false,
+                unique: true,
                 validate: {
+                    len: {
+                        args: [titleMinLength, titleMaxLength],
+                        msg: errors.place.title.length
+                    },
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.fields.place.title.empty_or_white_spaces, 422);
-                        } else if (!validation.validateRange(value, titleMinLength, titleMaxLength)) {
-                            throwError(error.fields.place.title.length, 422);
+                            throwError(errors.place.title.empty_or_white_spaces);
                         }
                     }
-                },
-                set(value) {
-                    if (typeof value !== 'string')
-                        value = String(value);
-
-                    value.trim();
-
-                    this.setDataValue('username', value.toLowerCase());
                 }
             },
             description: {
                 type: DataTypes.STRING(descriptionMaxLength),
                 allowNull: false,
-                unique: true,
                 validate: {
+                    len: {
+                        args: [descriptionMinLength, descriptionMaxLength],
+                        msg: errors.place.description.length
+                    },
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.fields.place.title.empty_or_white_spaces, 422);
-                        } else if (!validation.validateRange(value, descriptionMinLength, descriptionMaxLength)) {
-                            throwError(error.fields.place.description.length, 422);
+                            throwError(errors.place.title.empty_or_white_spaces);
                         }
                     }
                 }
@@ -65,31 +62,50 @@ module.exports = sequelize => {
                 type: DataTypes.STRING(stepsMaxLength),
                 allowNull: false,
                 validate: {
+                    len: {
+                        args: [stepsMinLength, stepsMaxLength],
+                        msg: errors.place.steps.length
+                    },
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(error.fields.place.title.empty_or_white_spaces, 422);
-                        } else if (!validation.validateRange(value, stepsMinLength, stepsMaxLength)) {
-                            throwError(error.fields.place.steps.length, 422);
+                            throwError(errors.place.title.empty_or_white_spaces);
                         }
                     }
                 }
             },
             latitude: {
-                type: DataTypes.STRING(9),
+                type: DataTypes.FLOAT(),
                 allowNull: false,
                 validate: {
                     isValid(value) {
+                        if (!validation.validateRange(value, latitudeMin, latitudeMax)) {
+                            throwError(errors.place.latitude.range);
+                        }
                     }
-                },
-                get() {
-
                 }
             },
             longitude: {
-                type: DataTypes.STRING(10),
-                allowNull: false
+                type: DataTypes.FLOAT(),
+                allowNull: false,
+                validate: {
+                    isValid(value) {
+                        if (!validation.validateRange(value, longitudeMin, longitudeMax)) {
+                            throwError(errors.place.longitude.range);
+                        }
+                    }
+                }
             },
-            userId: {}
+            userId: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                field: 'user_id',
+                references: {
+                    model: User,
+                    key: 'id',
+                    as: 'user_id'
+                },
+                onDelete: 'CASCADE'
+            }
         },
         {
             sequelize,

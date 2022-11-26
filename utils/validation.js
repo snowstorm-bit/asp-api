@@ -1,4 +1,5 @@
 'use strict';
+
 const { toString } = require('../utils/utils');
 
 exports.validateEmptyOrWhiteSpace = value => {

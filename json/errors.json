@@ -1,12 +1,15 @@
 {
-  "fields": {
+  "user": {
+    "unique_constraint": {
+      "code": "errors.fields.email.already_taken",
+      "cause": "email"
+    },
     "username": {
       "is_null": "errors.fields.username.is_null",
       "empty_or_white_spaces": "errors.fields.username.empty_or_white_spaces",
       "length": "errors.fields.username.length"
     },
     "email": {
-      "already_taken": "errors.fields.email.already_taken",
       "not_found": "errors.fields.email.not_found",
       "is_null": "errors.fields.email.is_null",
       "empty_or_white_spaces": "errors.fields.email.empty_or_white_spaces",
@@ -21,25 +24,45 @@
       "no_symbol": "errors.fields.password.no_symbol",
       "no_uppercase_letter": "errors.fields.password.no_uppercase_letter",
       "invalid": "errors.fields.password.invalid"
+    }
+  },
+  "place": {
+    "not_found": "errors.fields.place.not_found",
+    "unique_constraint": {
+      "code": "errors.fields.place.title.already_taken",
+      "cause": "title"
     },
-    "place": {
-      "title": {
-        "empty_or_white_spaces": "error.fields.place.title.empty_or_white_spaces",
-        "length": "error.fields.place.title.length"
-      },
-      "description": {
-        "empty_or_white_spaces": "error.fields.place.description.empty_or_white_spaces",
-        "length": "error.fields.place.description.length"
-      },
-      "steps": {
-        "empty_or_white_spaces": "error.fields.place.steps.empty_or_white_spaces",
-        "length": "error.fields.place.steps.length"
-      }
+    "title": {
+      "is_null": "errors.fields.place.title.is_null",
+      "empty_or_white_spaces": "errors.fields.place.title.empty_or_white_spaces",
+      "length": "errors.fields.place.title.length"
+    },
+    "description": {
+      "is_null": "errors.fields.place.description.is_null",
+      "empty_or_white_spaces": "errors.fields.place.description.empty_or_white_spaces",
+      "length": "errors.fields.place.description.length"
+    },
+    "steps": {
+      "is_null": "errors.fields.place.steps.is_null",
+      "empty_or_white_spaces": "errors.fields.place.steps.empty_or_white_spaces",
+      "length": "errors.fields.place.steps.length"
+    },
+    "latitude": {
+      "is_null": "errors.fields.place.latitude.is_null",
+      "range": "errors.fields.place.latitude.range"
+    },
+    "longitude": {
+      "is_null": "errors.fields.place.longitude.is_null",
+      "range": "errors.fields.place.longitude.range"
     }
   },
   "routes": {
     "register": "errors.routes.register",
-    "login": "errors.routes.login"
+    "login": "errors.routes.login",
+    "place": {
+      "create": "errors.routes.create",
+      "update": "errors.routes.update"
+    }
   },
   "auth": {
     "login_required": "errors.auth.login_required",
