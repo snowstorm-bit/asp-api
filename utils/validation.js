@@ -15,5 +15,3 @@ exports.validateRange = (value, min, max) => {
     toString(value);
     return value >= min && value <= max;
 };
-
-exports.errors = {};

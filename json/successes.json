@@ -1,4 +1,4 @@
 {
-  "registration": "success.registration",
-  "login": "success.login"
+  "register": "successes.register",
+  "login": "successes.login"
 }

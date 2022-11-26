@@ -77,22 +77,19 @@ module.exports = sequelize => {
             latitude: {
                 type: DataTypes.STRING(9),
                 allowNull: false,
-                field: 'access_level',
                 validate: {
-                    isValid(value) {}
+                    isValid(value) {
+                    }
                 },
-                get(){
-                    
+                get() {
+
                 }
             },
             longitude: {
                 type: DataTypes.STRING(10),
-                allowNull: false,
-                field: 'access_level'
+                allowNull: false
             },
-            userId: {
-                
-            }
+            userId: {}
         },
         {
             sequelize,
