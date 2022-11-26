@@ -1,6 +1,4 @@
 const { Model } = require('sequelize');
-var bcrypt = require('bcrypt');
-const { hashPassword } = require('../utils/utils');
 
 class User extends Model {
     /**
