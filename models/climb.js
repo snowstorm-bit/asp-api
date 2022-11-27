@@ -104,6 +104,15 @@ module.exports = sequelize => {
                     }
                 },
                 field: 'img_urls'
+            },
+            placeId: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+                references: {
+                    model: Place,
+                    key: 'id'
+                },
+                field: 'place_id'
             }
         },
         {
