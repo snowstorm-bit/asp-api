@@ -6,6 +6,7 @@ const { status } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const Place = require('../classes/place');
+const Climb = require('../classes/climb');
 
 exports.getAll = async (req, res, next) => {
 };
@@ -90,6 +91,13 @@ exports.getForUpdate = async (req, res, next) => {
             }
         });
 
+        let placeTitles = await Places.findAll({
+            attributes: ['title'],
+            where: {
+                userId: req.user.id
+            }
+        });
+
         res.status(200).json({
             code: successes.climb.update,
             status: status.success,
@@ -98,7 +106,8 @@ exports.getForUpdate = async (req, res, next) => {
                 description: climb.description,
                 style: climb.style,
                 difficultyLevel: climb.difficultyLevel,
-                placeTitle: climb.place.placeId
+                placeTitle: climb.place.title,
+                placeTitles: placeTitles
             }
         });
     } catch (err) {
