@@ -11,7 +11,6 @@ module.exports = sequelize => {
             placeId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
-                underscored: true,
                 references: {
                     model: Place,
                     key: 'id',
@@ -22,7 +21,6 @@ module.exports = sequelize => {
             climbId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
-                underscored: true,
                 references: {
                     model: Climb,
                     key: 'id',
@@ -32,9 +30,12 @@ module.exports = sequelize => {
         },
         {
             sequelize,
-            timestamps: true,
+            timestamps: false,
             underscored: true
         }
     );
+
+    PlaceClimbs.removeAttribute('id');
+
     return PlaceClimbs;
 };

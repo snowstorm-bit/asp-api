@@ -1,7 +1,8 @@
 'use strict';
 
 const { Places } = require('../database');
-const { throwError, status, manageError } = require('../utils/utils');
+const { throwError, manageError } = require('../utils/utils');
+const { status } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 

@@ -4,7 +4,8 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const { throwError, manageError, status, userAccessLevel } = require('../utils/utils');
+const { throwError, manageError } = require('../utils/utils');
+const { status, userAccessLevel } = require('../utils/enums');
 const { Users } = require('../database');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');

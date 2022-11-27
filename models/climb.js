@@ -12,8 +12,6 @@ const titleMinLength = 3;
 const titleMaxLength = 50;
 const descriptionMinLength = 3;
 const descriptionMaxLength = 500;
-const rateMin = 1;
-const rateMax = 5;
 
 module.exports = sequelize => {
     Climb.init(
@@ -70,7 +68,7 @@ module.exports = sequelize => {
                 }
             },
             difficultyLevel: {
-                type: DataTypes.NUMBER({ decimals: 2 }),
+                type: DataTypes.DECIMAL(3, 2),
                 allowNull: false,
                 validate: {
                     isDecimal: {
@@ -92,22 +90,7 @@ module.exports = sequelize => {
                         }
                     }
                 },
-                underscored: true
-            },
-            rate: {
-                type: DataTypes.INTEGER(1),
-                isInt: {
-                    args: true,
-                    msg: errors.climb.rate.not_int
-                },
-                isValid(value) {
-                    let valueToValidate = value;
-                    if (!validation.validateEmptyOrWhiteSpace(valueToValidate)) {
-                        throwError(errors.climb.rate.empty_or_white_spaces);
-                    } else if (!validation.validateRange(value, rateMin, rateMax)) {
-                        throwError(errors.climb.rate.range);
-                    }
-                }
+                field: 'difficulty_level'
             },
             imgUrls: {
                 type: DataTypes.TEXT(),
@@ -120,7 +103,7 @@ module.exports = sequelize => {
                         return value.join(';');
                     }
                 },
-                underscored: true
+                field: 'img_urls'
             }
         },
         {

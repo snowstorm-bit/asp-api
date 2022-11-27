@@ -95,7 +95,7 @@ module.exports = sequelize => {
             accessLevel: {
                 type: DataTypes.INTEGER(1),
                 allowNull: false,
-                underscored: true
+                field: 'access_level'
             }
         },
         {

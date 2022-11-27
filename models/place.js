@@ -101,8 +101,7 @@ module.exports = sequelize => {
                 field: 'user_id',
                 references: {
                     model: User,
-                    key: 'id',
-                    underscored: true
+                    key: 'id'
                 },
                 onDelete: 'CASCADE'
             }
@@ -112,6 +111,5 @@ module.exports = sequelize => {
             timestamps: true
         }
     );
-
     return Place;
 };

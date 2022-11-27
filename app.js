@@ -7,7 +7,7 @@ const placeRoutes = require('./routes/placeRoutes');
 const climbRoutes = require('./routes/climbRoutes');
 
 const database = require('./database');
-const { status } = require('./utils/utils');
+const { status } = require('./utils/enums');
 
 const app = express();
 
@@ -39,5 +39,7 @@ app.use((error, req, res, next) =>
 app.listen(8080, async () => {
     console.log('Connection à la BD ouverte sur le port %s ', 8080);
 
-    await database.sequelize.sync();
+    let alter = false;
+    // let alter = true;
+    await database.sequelize.sync({ alter: alter });
 });
