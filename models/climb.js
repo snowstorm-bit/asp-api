@@ -110,7 +110,8 @@ module.exports = sequelize => {
                 allowNull: false,
                 references: {
                     model: Place,
-                    key: 'id'
+                    key: 'id',
+                    as: 'place_id'
                 },
                 field: 'place_id'
             }

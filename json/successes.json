@@ -2,11 +2,11 @@
   "register": "successes.register",
   "login": "successes.login",
   "place": {
-    "create": "successes.create",
-    "update": "successes.update"
+    "create": "successes.place.create",
+    "update": "successes.place.update"
   },
   "climb": {
-    "create": "successes.create",
-    "update": "successes.update"
+    "create": "successes.climb.create",
+    "update": "successes.climb.update"
   }
 }

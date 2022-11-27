@@ -2,11 +2,10 @@
 
 const { Climbs, Places } = require('../database');
 const { throwError, manageError } = require('../utils/utils');
-const { status } = require('../utils/enums');
+const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const Place = require('../classes/place');
-const Climb = require('../classes/climb');
 
 exports.getAll = async (req, res, next) => {
 };
@@ -16,7 +15,28 @@ exports.getOne = async (req, res, next) => {
 
 
 exports.getForCreate = async (req, res, next) => {
+    try {
+        let placeTitles = await Places.findAll({
+            attributes: ['title'],
+            where: {
+                userId: req.user.id
+            }
+        });
 
+        res.status(200).json({
+            code: successes.climb.create,
+            status: status.success,
+            result: {
+                styles: climbStyle,
+                placeTitles: placeTitles
+            }
+        });
+    } catch (err) {
+        next(manageError(err, {
+            code: errors.routes.climb.create,
+            cause: 'climb_create'
+        }));
+    }
 };
 
 exports.create = async (req, res, next) => {
@@ -51,6 +71,7 @@ exports.create = async (req, res, next) => {
             }
         });
     } catch (err) {
+        console.log(err);
         next(manageError(err, {
             code: errors.routes.climb.create,
             cause: 'climb_create'
@@ -64,7 +85,7 @@ exports.getForUpdate = async (req, res, next) => {
             attributes: [],
             include: {
                 model: Place,
-                attributes: ['user_id'],
+                attributes: ['userId'],
                 required: true
             },
             where: {
@@ -72,15 +93,14 @@ exports.getForUpdate = async (req, res, next) => {
             }
         });
 
-        console.log(result.place);
         if (result === null) {
             throwError(errors.climb.not_found, 'climb', 404, false);
-        } else if (result.place.userId !== req.user.id) {
+        } else if (result.Place.userId !== req.user.id) {
             throwError(errors.auth.unauthorized, 'climb_update', 403, false);
         }
 
         let climb = await Climbs.findOne({
-            attributes: ['title', 'description', 'style', 'difficulty_level'],
+            attributes: ['title', 'description', 'style', 'difficultyLevel'],
             include: {
                 model: Place,
                 attributes: ['title'],
@@ -105,12 +125,14 @@ exports.getForUpdate = async (req, res, next) => {
                 title: climb.title,
                 description: climb.description,
                 style: climb.style,
+                styles: climbStyle,
                 difficultyLevel: climb.difficultyLevel,
-                placeTitle: climb.place.title,
+                placeTitle: climb.Place.title,
                 placeTitles: placeTitles
             }
         });
     } catch (err) {
+        console.log(err);
         next(manageError(err, {
             code: errors.routes.climb.update,
             cause: 'climb_update'
@@ -124,7 +146,7 @@ exports.update = async (req, res, next) => {
             attributes: ['id', 'title'],
             include: {
                 model: Place,
-                attributes: ['user_id'],
+                attributes: ['userId'],
                 required: true
             },
             where: {
@@ -132,12 +154,11 @@ exports.update = async (req, res, next) => {
             }
         });
 
-        console.log(result.place);
         if (result === null) {
             throwError(errors.climb.not_found, 'climb', 404, false);
-        } else if (result.place.userId !== req.user.id) {
+        } else if (result.Place.userId !== req.user.id) {
             throwError(errors.auth.unauthorized, 'climb_update', 403, false);
-        } else if (req.body.title !== req.params.title) {
+        } else if (req.params.title !== req.body.title && result.title === req.body.title) {
             throwError(errors.climb.unique_constraint, 'title', 422, false);
         }
 

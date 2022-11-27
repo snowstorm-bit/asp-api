@@ -78,6 +78,9 @@
       "not_decimal": "errors.fields.climb.difficulty_level.not_decimal",
       "empty_or_white_spaces": "errors.fields.climb.difficulty_level.empty_or_white_spaces",
       "range": "errors.fields.climb.difficulty_level.range"
+    },
+    "place_id": {
+      "is_null": "errors.fields.climb.place_id.is_null"
     }
   },
   "user_rates": {
@@ -102,6 +105,6 @@
   "auth": {
     "login_required": "errors.auth.login_required",
     "session_expired": "errors.auth.session_expired",
-    "unauthorized": "errors.auth.session_unauthorized"
+    "unauthorized": "errors.auth.unauthorized"
   }
 }

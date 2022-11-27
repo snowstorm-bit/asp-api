@@ -2,9 +2,9 @@
 
 const { Sequelize, DataTypes } = require('sequelize');
 const dotenv = require('dotenv');
-const PlaceClimbs = require('./classes/placeClimbs');
 const Place = require('./classes/place');
 const Climb = require('./classes/climb');
+
 
 dotenv.config();
 
@@ -27,5 +27,15 @@ db.Users = require('./models/user')(db.sequelize);
 db.Places = require('./models/place')(db.sequelize);
 db.Climbs = require('./models/climb')(db.sequelize);
 db.UserRates = require('./models/userRates')(db.sequelize);
+
+db.PlaceAssociation = Place.hasMany(Climb, {
+    foreignKey: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: 'place_id'
+    }
+});
+
+db.ClimbAssociation = Climb.belongsTo(Place);
 
 module.exports = db;

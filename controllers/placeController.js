@@ -45,12 +45,13 @@ exports.create = async (req, res, next) => {
 exports.getForUpdate = async (req, res, next) => {
     try {
         let result = await Places.findOne({
-            attributes: ['user_id'],
+            attributes: ['userId'],
             where: {
                 title: req.params.title
             }
         });
 
+        console.log(result);
         if (result === null) {
             throwError(errors.place.not_found, 'place', 404, false);
         } else if (result.userId !== req.user.id) {
@@ -86,7 +87,7 @@ exports.getForUpdate = async (req, res, next) => {
 exports.update = async (req, res, next) => {
     try {
         let result = await Places.findOne({
-            attributes: ['id', 'user_id'],
+            attributes: ['id', 'userId'],
             where: {
                 title: req.params.title
             }
