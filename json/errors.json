@@ -58,10 +58,7 @@
   },
   "climb": {
     "not_found": "errors.fields.climb.not_found",
-    "unique_constraint": {
-      "code": "errors.fields.climb.title.already_taken",
-      "cause": "title"
-    },
+    "unique_constraint": "errors.fields.climb.title.already_taken",
     "title": {
       "is_null": "errors.fields.climb.title.is_null",
       "empty_or_white_spaces": "errors.fields.climb.title.empty_or_white_spaces",
@@ -94,12 +91,12 @@
     "register": "errors.routes.register",
     "login": "errors.routes.login",
     "place": {
-      "create": "errors.routes.create",
-      "update": "errors.routes.update"
+      "create": "errors.routes.place.create",
+      "update": "errors.routes.place.update"
     },
     "climb": {
-      "create": "errors.routes.climb",
-      "update": "errors.routes.climb"
+      "create": "errors.routes.climb.create",
+      "update": "errors.routes.climb.update"
     }
   },
   "auth": {

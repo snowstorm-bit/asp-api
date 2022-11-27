@@ -29,22 +29,24 @@ db.Climbs = require('./models/climb')(db.sequelize);
 db.PlaceClimbs = require('./models/placeClimbs')(db.sequelize);
 db.UserRates = require('./models/userRates')(db.sequelize);
 
-Place.hasMany(PlaceClimbs, {
+db.PlaceHasMany = Place.hasMany(PlaceClimbs, {
     foreignKey: {
-        as: 'place_id',
         allowNull: false
     }
 });
 
-PlaceClimbs.belongsTo(Place);
+db.PlaceClimbBelongsToPlace = PlaceClimbs.belongsTo(Place, {
+    as: 'place'
+});
 
-Climb.hasOne(PlaceClimbs, {
+db.ClimbHasOne = Climb.hasOne(PlaceClimbs, {
     foreignKey: {
-        as: 'climb_id',
         allowNull: false
     }
 });
 
-PlaceClimbs.belongsTo(Climb);
+db.PlaceClimbsBelongsToClimb = PlaceClimbs.belongsTo(Climb, {
+    as: 'climb'
+});
 
 module.exports = db;

@@ -13,17 +13,6 @@ dotenv.config();
 
 exports.register = async (req, res, next) => {
     try {
-        // let result = await Users.findOne({
-        //     attributes: ['username', 'password'],
-        //     where: {
-        //         email: req.body.email
-        //     }
-        // });
-        //
-        // if (result !== null) {
-        //     throwError(errors.user.email.already_taken, 'email', 422, false);
-        // }
-
         let user = await Users.create(
             {
                 username: req.body.username,

@@ -13,18 +13,15 @@ module.exports = sequelize => {
                 allowNull: false,
                 references: {
                     model: Place,
-                    key: 'id',
-                    as: 'place_id'
-                },
-                onDelete: 'CASCADE'
+                    key: 'id'
+                }
             },
             climbId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 references: {
                     model: Climb,
-                    key: 'id',
-                    as: 'climb_id'
+                    key: 'id'
                 }
             }
         },

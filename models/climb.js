@@ -76,12 +76,12 @@ module.exports = sequelize => {
                         msg: errors.climb.difficulty_level.not_decimal
                     },
                     isValid(value) {
-                        let valueToValidate = value;
-                        if (!validation.validateEmptyOrWhiteSpace(valueToValidate)) {
+                        if (!validation.validateEmptyOrWhiteSpace(value)) {
                             throwError(errors.climb.difficulty_level.empty_or_white_spaces);
                         }
 
-                        let [integer, decimal] = valueToValidate.split('.');
+                        let valueToValidate = value;
+                        let [integer, decimal] = String(valueToValidate).split('.');
                         integer = Number(integer);
                         decimal = Number(decimal);
 
