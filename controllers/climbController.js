@@ -13,7 +13,6 @@ exports.getAll = async (req, res, next) => {
 exports.getOne = async (req, res, next) => {
 };
 
-
 exports.getForCreate = async (req, res, next) => {
     try {
         let placeTitles = await Places.findAll({
@@ -22,9 +21,8 @@ exports.getForCreate = async (req, res, next) => {
                 userId: req.user.id
             }
         });
-
         res.status(200).json({
-            code: successes.climb.create,
+            code: successes.routes.create.climb,
             status: status.success,
             result: {
                 styles: climbStyle,
@@ -33,18 +31,31 @@ exports.getForCreate = async (req, res, next) => {
         });
     } catch (err) {
         next(manageError(err, {
-            code: errors.routes.climb.create,
-            cause: 'climb_create'
+            code: errors.routes.create.climb,
+            cause: 'create_climb'
         }));
     }
 };
 
 exports.create = async (req, res, next) => {
     try {
+        let place = await Places.findOne({
+            attributes: ['id', 'userId'],
+            where: {
+                title: req.body.placeTitle
+            }
+        });
+
+        if (place === null) {
+            throwError(errors.climb.place_title.not_found, 'place_title', 404, false);
+        } else if (place.userId !== req.user.id) {
+            throwError(errors.climb.place_title.unauthorized, 'place_title', 403, false);
+        }
+
         let result = await Climbs.findOne({
             attributes: ['title'],
             where: {
-                placeId: req.body.placeId,
+                placeId: place.id,
                 title: req.body.title
             }
         });
@@ -58,13 +69,13 @@ exports.create = async (req, res, next) => {
             description: req.body.description,
             style: req.body.style,
             difficultyLevel: req.body.difficultyLevel,
-            placeId: req.body.placeId
+            placeId: place.id
         });
 
         await climb.save();
 
         res.status(201).json({
-            code: successes.climb.create,
+            code: successes.routes.create.climb,
             status: status.success,
             result: {
                 title: climb.title
@@ -73,8 +84,8 @@ exports.create = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         next(manageError(err, {
-            code: errors.routes.climb.create,
-            cause: 'climb_create'
+            code: errors.routes.create.climb,
+            cause: 'create_climb'
         }));
     }
 };
@@ -119,7 +130,7 @@ exports.getForUpdate = async (req, res, next) => {
         });
 
         res.status(200).json({
-            code: successes.climb.update,
+            code: successes.routes.update.climb,
             status: status.success,
             result: {
                 title: climb.title,
@@ -134,8 +145,8 @@ exports.getForUpdate = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         next(manageError(err, {
-            code: errors.routes.climb.update,
-            cause: 'climb_update'
+            code: errors.routes.update.climb,
+            cause: 'update_climb'
         }));
     }
 };
@@ -162,18 +173,31 @@ exports.update = async (req, res, next) => {
             throwError(errors.climb.unique_constraint, 'title', 422, false);
         }
 
+        let place = await Places.findOne({
+            attributes: ['id', 'userId'],
+            where: {
+                title: req.body.placeTitle
+            }
+        });
+
+        if (place === null) {
+            throwError(errors.climb.place_title.not_found, 'place_title', 404, false);
+        } else if (place.userId !== req.user.id) {
+            throwError(errors.climb.place_title.unauthorized, 'place_title', 403, false);
+        }
+
         let climb = await result.set({
             title: req.body.title,
             description: req.body.description,
             style: req.body.style,
             difficultyLevel: req.body.difficultyLevel,
-            placeId: req.body.placeId
+            placeId: place.id
         });
 
         await climb.save();
 
         res.status(200).json({
-            code: successes.climb.update,
+            code: successes.routes.update.climb,
             status: status.success,
             result: {
                 title: climb.title
@@ -181,8 +205,8 @@ exports.update = async (req, res, next) => {
         });
     } catch (err) {
         next(manageError(err, {
-            code: errors.routes.climb.update,
-            cause: 'climb_update'
+            code: errors.routes.update.climb,
+            cause: 'update_climb'
         }));
     }
 };

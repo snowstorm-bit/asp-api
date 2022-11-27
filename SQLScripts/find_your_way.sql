@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Nov 26, 2022 at 02:51 PM
+-- Generation Time: Nov 27, 2022 at 04:37 PM
 -- Server version: 10.6.5-MariaDB
 -- PHP Version: 7.4.26
 
@@ -20,27 +20,36 @@ SET time_zone = "+00:00";
 --
 -- Database: `find_your_way`
 --
-CREATE DATABASE IF NOT EXISTS `find_your_way` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+CREATE DATABASE IF NOT EXISTS `find_your_way` DEFAULT CHARACTER SET latin1 COLLATE latin1_general_ci;
 USE `find_your_way`;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `place`
+-- Table structure for table `climbs`
 --
 
-DROP TABLE IF EXISTS `place`;
-CREATE TABLE IF NOT EXISTS `place` (
+DROP TABLE IF EXISTS `climbs`;
+CREATE TABLE IF NOT EXISTS `climbs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` varchar(50) NOT NULL,
-  `description` varchar(500) NOT NULL,
-  `steps` varchar(500) NOT NULL,
-  `latitude` float NOT NULL,
-  `longitude` float NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `title` varchar(50) COLLATE latin1_general_ci NOT NULL,
+  `description` varchar(500) COLLATE latin1_general_ci NOT NULL,
+  `style` varchar(255) COLLATE latin1_general_ci NOT NULL,
+  `difficulty_level` decimal(3,2) NOT NULL,
+  `img_urls` text COLLATE latin1_general_ci DEFAULT NULL,
+  `place_id` int(11) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  KEY `place_id` (`place_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+
+--
+-- Dumping data for table `climbs`
+--
+
+INSERT INTO `climbs` (`id`, `title`, `description`, `style`, `difficulty_level`, `img_urls`, `place_id`, `createdAt`, `updatedAt`) VALUES
+(1, 'Climb 3', 'description', 'traditional', '5.60', NULL, 1, '2022-11-27 07:02:38', '2022-11-27 07:18:13');
 
 -- --------------------------------------------------------
 
@@ -51,9 +60,9 @@ CREATE TABLE IF NOT EXISTS `place` (
 DROP TABLE IF EXISTS `places`;
 CREATE TABLE IF NOT EXISTS `places` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` varchar(50) NOT NULL,
-  `description` varchar(500) NOT NULL,
-  `steps` varchar(500) NOT NULL,
+  `title` varchar(50) COLLATE latin1_general_ci NOT NULL,
+  `description` varchar(500) COLLATE latin1_general_ci NOT NULL,
+  `steps` varchar(500) COLLATE latin1_general_ci NOT NULL,
   `latitude` float NOT NULL,
   `longitude` float NOT NULL,
   `user_id` int(11) NOT NULL,
@@ -62,24 +71,14 @@ CREATE TABLE IF NOT EXISTS `places` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `title` (`title`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 --
--- Table structure for table `user`
+-- Dumping data for table `places`
 --
 
-DROP TABLE IF EXISTS `user`;
-CREATE TABLE IF NOT EXISTS `user` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(50) NOT NULL,
-  `email` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `access_level` int(1) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+INSERT INTO `places` (`id`, `title`, `description`, `steps`, `latitude`, `longitude`, `user_id`, `createdAt`, `updatedAt`) VALUES
+(1, 'Place 8', 'description', 'steps', 0, 0, 1, '2022-11-27 06:57:29', '2022-11-27 06:57:34');
 
 -- --------------------------------------------------------
 
@@ -90,31 +89,60 @@ CREATE TABLE IF NOT EXISTS `user` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(50) NOT NULL,
-  `email` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `username` varchar(50) COLLATE latin1_general_ci NOT NULL,
+  `email` varchar(50) COLLATE latin1_general_ci NOT NULL,
+  `password` varchar(255) COLLATE latin1_general_ci NOT NULL,
   `access_level` int(1) NOT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `access_level`, `createdAt`, `updatedAt`) VALUES
+(1, 'bob martin', 'm@s.com', '$2b$12$EzjvHNYpEv.CW7uWe1TXrOEG3yCR8u5i9nHn7Vdsj3Fzu8nS4HW/6', 1, '2022-11-27 06:57:15', '2022-11-27 06:57:15');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_rates`
+--
+
+DROP TABLE IF EXISTS `user_rates`;
+CREATE TABLE IF NOT EXISTS `user_rates` (
+  `user_id` int(11) NOT NULL,
+  `climb_id` int(11) NOT NULL,
+  `rate` int(1) NOT NULL,
+  KEY `user_id` (`user_id`),
+  KEY `climb_id` (`climb_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `place`
+-- Constraints for table `climbs`
 --
-ALTER TABLE `place`
-  ADD CONSTRAINT `place_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `climbs`
+  ADD CONSTRAINT `climbs_ibfk_1` FOREIGN KEY (`place_id`) REFERENCES `places` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `places`
 --
 ALTER TABLE `places`
-  ADD CONSTRAINT `places_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `places_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `user_rates`
+--
+ALTER TABLE `user_rates`
+  ADD CONSTRAINT `user_rates_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_rates_ibfk_2` FOREIGN KEY (`climb_id`) REFERENCES `climbs` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

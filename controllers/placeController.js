@@ -28,7 +28,7 @@ exports.create = async (req, res, next) => {
         await place.save();
 
         res.status(201).json({
-            code: successes.place.create,
+            code: successes.routes.create.place,
             status: status.success,
             result: {
                 title: place.title
@@ -36,7 +36,7 @@ exports.create = async (req, res, next) => {
         });
     } catch (err) {
         next(manageError(err, {
-            code: errors.routes.place.create,
+            code: errors.routes.create.place,
             cause: 'place_create'
         }));
     }
@@ -55,7 +55,7 @@ exports.getForUpdate = async (req, res, next) => {
         if (result === null) {
             throwError(errors.place.not_found, 'place', 404, false);
         } else if (result.userId !== req.user.id) {
-            throwError(errors.auth.unauthorized, 'place_update', 403, false);
+            throwError(errors.auth.unauthorized, 'update_place', 403, false);
         }
 
         let place = await Places.findOne({
@@ -66,7 +66,7 @@ exports.getForUpdate = async (req, res, next) => {
         });
 
         res.status(200).json({
-            code: successes.place.update,
+            code: successes.routes.update.place,
             status: status.success,
             result: {
                 title: place.title,
@@ -78,8 +78,8 @@ exports.getForUpdate = async (req, res, next) => {
         });
     } catch (err) {
         next(manageError(err, {
-            code: errors.routes.place.update,
-            cause: 'place_update'
+            code: errors.routes.update.place,
+            cause: 'update_place'
         }));
     }
 };
@@ -96,7 +96,7 @@ exports.update = async (req, res, next) => {
         if (result === null) {
             throwError(errors.place.not_found, 'place', 404, false);
         } else if (result.userId !== req.user.id) {
-            throwError(errors.auth.unauthorized, 'place_update', 403, false);
+            throwError(errors.auth.unauthorized, 'update_place', 403, false);
         }
 
         let place = await result.set({
@@ -110,7 +110,7 @@ exports.update = async (req, res, next) => {
         await place.save();
 
         res.status(200).json({
-            code: successes.place.update,
+            code: successes.routes.update.place,
             status: status.success,
             result: {
                 title: place.title
@@ -119,8 +119,8 @@ exports.update = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         next(manageError(err, {
-            code: errors.routes.place.update,
-            cause: 'place_update'
+            code: errors.routes.update.place,
+            cause: 'update_place'
         }));
     }
 };

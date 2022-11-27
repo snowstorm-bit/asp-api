@@ -25,7 +25,7 @@ exports.register = async (req, res, next) => {
         await user.save();
 
         res.status(201).json({
-            code: successes.register,
+            code: successes.routes.register,
             status: status.success,
             result: {
                 username: user.username,
@@ -67,7 +67,7 @@ exports.login = async (req, res, next) => {
         }
 
         res.status(200).json({
-            code: successes.login,
+            code: successes.routes.login,
             status: status.success,
             result: {
                 username: user.username,

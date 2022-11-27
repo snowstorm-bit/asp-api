@@ -32,7 +32,8 @@ db.PlaceAssociation = Place.hasMany(Climb, {
     foreignKey: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'place_id'
+        field: 'place_id',
+        name: 'placeId'
     }
 });
 
