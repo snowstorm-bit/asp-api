@@ -7,7 +7,6 @@ const placeController = require('../controllers/placeController');
 
 router.get('/all', placeController.getAll);
 router.get('/details/:title', placeController.getOne);
-router.get('/', isAuth, placeController.getForCreate);
 router.post('/', isAuth, placeController.create);
 router.get('/:title', isAuth, placeController.getForUpdate);
 router.put('/:title', isAuth, placeController.update);

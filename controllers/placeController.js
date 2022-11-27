@@ -12,11 +12,6 @@ exports.getAll = async (req, res, next) => {
 exports.getOne = async (req, res, next) => {
 };
 
-
-exports.getForCreate = async (req, res, next) => {
-
-};
-
 exports.create = async (req, res, next) => {
     try {
         let place = await Places.create(
@@ -48,13 +43,50 @@ exports.create = async (req, res, next) => {
 };
 
 exports.getForUpdate = async (req, res, next) => {
+    try {
+        let result = await Places.findOne({
+            attributes: ['user_id'],
+            where: {
+                title: req.params.title
+            }
+        });
 
+        if (result === null) {
+            throwError(errors.place.not_found, 'place', 404, false);
+        } else if (result.userId !== req.user.id) {
+            throwError(errors.auth.unauthorized, 'place_update', 403, false);
+        }
+
+        let place = await Places.findOne({
+            attributes: ['title', 'description', 'steps', 'latitude', 'longitude'],
+            where: {
+                title: req.params.title
+            }
+        });
+
+        res.status(200).json({
+            code: successes.place.update,
+            status: status.success,
+            result: {
+                title: place.title,
+                description: place.description,
+                steps: place.steps,
+                latitude: place.latitude,
+                longitude: place.longitude
+            }
+        });
+    } catch (err) {
+        next(manageError(err, {
+            code: errors.routes.place.update,
+            cause: 'place_update'
+        }));
+    }
 };
 
 exports.update = async (req, res, next) => {
     try {
         let result = await Places.findOne({
-            attributes: ['id', 'title', 'user_id'],
+            attributes: ['id', 'user_id'],
             where: {
                 title: req.params.title
             }
