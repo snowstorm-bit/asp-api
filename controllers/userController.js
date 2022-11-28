@@ -52,7 +52,7 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     try {
         let user = await Users.findOne({
-            attributes: ['id', 'username', 'email', 'password'],
+            attributes: ['id', 'username', 'email', 'password', 'accessLevel'],
             where: {
                 email: req.body.email
             }
@@ -63,7 +63,7 @@ exports.login = async (req, res, next) => {
         }
 
         if (!bcrypt.compareSync(`${ req.body.password }`, user.password)) {
-            throwError(errors.user.password.invalid, 'password', 422, false);
+            throwError(errors.user.invalid, 'login', 422, false);
         }
 
         res.status(200).json({

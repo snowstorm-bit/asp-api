@@ -23,8 +23,10 @@
 			"no_number": "errors.fields.user.password.no_number",
 			"no_symbol": "errors.fields.user.password.no_symbol",
 			"no_uppercase_letter": "errors.fields.user.password.no_uppercase_letter",
-			"invalid": "errors.fields.user.password.invalid"
-		}
+			"invalid": "errors.fields.user.password.invalid",
+			"not_password": "errors.fields.user.password.not_password"
+		},
+		"invalid": "errors.fields.user.invalid"
 	},
 	"place": {
 		"not_found": "errors.fields.place.not_found",
