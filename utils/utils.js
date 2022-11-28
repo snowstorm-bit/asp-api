@@ -39,8 +39,7 @@ module.exports.manageError = (err, globalError) => {
     if ('errors' in err) {
         errorToManage.statusCode = 422;
         err.errors.forEach(errToManage => {
-            // console.log(errToManage);
-
+            console.log(errToManage);
             let cause = errToManage.path;
             let model = errToManage.instance.constructor.name.toString().toLowerCase();
 
@@ -84,22 +83,5 @@ module.exports.manageError = (err, globalError) => {
     return errorToManage;
 };
 
-module.exports.toString = value => {
-    if (typeof value !== 'string')
-        value = String(value);
-
-    value.trim();
-};
-
 module.exports.hashPassword = password =>
     bcrypt.hashSync(`${ password }`, 12);
-
-module.exports.status = {
-    success: 'success',
-    error: 'error'
-};
-
-module.exports.userAccessLevel = {
-    user: 1,
-    admin: 2
-};

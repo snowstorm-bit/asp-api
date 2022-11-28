@@ -1,72 +1,116 @@
 {
-  "user": {
-    "unique_constraint": {
-      "code": "errors.fields.email.already_taken",
-      "cause": "email"
-    },
-    "username": {
-      "is_null": "errors.fields.username.is_null",
-      "empty_or_white_spaces": "errors.fields.username.empty_or_white_spaces",
-      "length": "errors.fields.username.length"
-    },
-    "email": {
-      "not_found": "errors.fields.email.not_found",
-      "is_null": "errors.fields.email.is_null",
-      "empty_or_white_spaces": "errors.fields.email.empty_or_white_spaces",
-      "length_exceeded": "errors.fields.email.length_exceeded",
-      "invalid": "errors.fields.email.invalid"
-    },
-    "password": {
-      "is_null": "errors.fields.password.is_null",
-      "empty_or_white_spaces": "errors.fields.password.empty_or_white_spaces",
-      "length": "errors.fields.password.length",
-      "no_number": "errors.fields.password.no_number",
-      "no_symbol": "errors.fields.password.no_symbol",
-      "no_uppercase_letter": "errors.fields.password.no_uppercase_letter",
-      "invalid": "errors.fields.password.invalid"
-    }
-  },
-  "place": {
-    "not_found": "errors.fields.place.not_found",
-    "unique_constraint": {
-      "code": "errors.fields.place.title.already_taken",
-      "cause": "title"
-    },
-    "title": {
-      "is_null": "errors.fields.place.title.is_null",
-      "empty_or_white_spaces": "errors.fields.place.title.empty_or_white_spaces",
-      "length": "errors.fields.place.title.length"
-    },
-    "description": {
-      "is_null": "errors.fields.place.description.is_null",
-      "empty_or_white_spaces": "errors.fields.place.description.empty_or_white_spaces",
-      "length": "errors.fields.place.description.length"
-    },
-    "steps": {
-      "is_null": "errors.fields.place.steps.is_null",
-      "empty_or_white_spaces": "errors.fields.place.steps.empty_or_white_spaces",
-      "length": "errors.fields.place.steps.length"
-    },
-    "latitude": {
-      "is_null": "errors.fields.place.latitude.is_null",
-      "range": "errors.fields.place.latitude.range"
-    },
-    "longitude": {
-      "is_null": "errors.fields.place.longitude.is_null",
-      "range": "errors.fields.place.longitude.range"
-    }
-  },
-  "routes": {
-    "register": "errors.routes.register",
-    "login": "errors.routes.login",
-    "place": {
-      "create": "errors.routes.create",
-      "update": "errors.routes.update"
-    }
-  },
-  "auth": {
-    "login_required": "errors.auth.login_required",
-    "session_expired": "errors.auth.session_expired",
-    "unauthorized": "errors.auth.session_unauthorized"
-  }
+	"user": {
+		"unique_constraint": {
+			"code": "errors.fields.user.email.already_taken",
+			"cause": "email"
+		},
+		"username": {
+			"is_null": "errors.fields.user.username.is_null",
+			"empty_or_white_spaces": "errors.fields.user.username.empty_or_white_spaces",
+			"length": "errors.fields.user.username.length"
+		},
+		"email": {
+			"not_found": "errors.fields.user.email.not_found",
+			"is_null": "errors.fields.user.email.is_null",
+			"empty_or_white_spaces": "errors.fields.user.email.empty_or_white_spaces",
+			"length_exceeded": "errors.fields.user.email.length_exceeded",
+			"invalid": "errors.fields.user.email.invalid"
+		},
+		"password": {
+			"is_null": "errors.fields.user.password.is_null",
+			"empty_or_white_spaces": "errors.fields.user.password.empty_or_white_spaces",
+			"length": "errors.fields.user.password.length",
+			"no_number": "errors.fields.user.password.no_number",
+			"no_symbol": "errors.fields.user.password.no_symbol",
+			"no_uppercase_letter": "errors.fields.user.password.no_uppercase_letter",
+			"invalid": "errors.fields.user.password.invalid",
+			"not_password": "errors.fields.user.password.not_password"
+		},
+		"invalid": "errors.fields.user.invalid"
+	},
+	"place": {
+		"not_found": "errors.fields.place.not_found",
+		"unique_constraint": {
+			"code": "errors.fields.place.title.already_taken",
+			"cause": "title"
+		},
+		"title": {
+			"is_null": "errors.fields.place.title.is_null",
+			"empty_or_white_spaces": "errors.fields.place.title.empty_or_white_spaces",
+			"length": "errors.fields.place.title.length"
+		},
+		"description": {
+			"is_null": "errors.fields.place.description.is_null",
+			"empty_or_white_spaces": "errors.fields.place.description.empty_or_white_spaces",
+			"length": "errors.fields.place.description.length"
+		},
+		"steps": {
+			"is_null": "errors.fields.place.steps.is_null",
+			"empty_or_white_spaces": "errors.fields.place.steps.empty_or_white_spaces",
+			"length": "errors.fields.place.steps.length"
+		},
+		"latitude": {
+			"is_null": "errors.fields.place.latitude.is_null",
+			"range": "errors.fields.place.latitude.range"
+		},
+		"longitude": {
+			"is_null": "errors.fields.place.longitude.is_null",
+			"range": "errors.fields.place.longitude.range"
+		}
+	},
+	"climb": {
+		"not_found": "errors.fields.climb.not_found",
+		"unique_constraint": "errors.fields.climb.title.already_taken",
+		"title": {
+			"is_null": "errors.fields.climb.title.is_null",
+			"empty_or_white_spaces": "errors.fields.climb.title.empty_or_white_spaces",
+			"length": "errors.fields.climb.title.length"
+		},
+		"description": {
+			"is_null": "errors.fields.climb.description.is_null",
+			"empty_or_white_spaces": "errors.fields.climb.description.empty_or_white_spaces",
+			"length": "errors.fields.climb.description.length"
+		},
+		"style": {
+			"is_null": "errors.fields.climb.style.is_null",
+			"empty_or_white_spaces": "errors.fields.climb.style.empty_or_white_spaces",
+			"not_in": "errors.fields.climb.style.not_in"
+		},
+		"difficulty_level": {
+			"not_decimal": "errors.fields.climb.difficulty_level.not_decimal",
+			"empty_or_white_spaces": "errors.fields.climb.difficulty_level.empty_or_white_spaces",
+			"range": "errors.fields.climb.difficulty_level.range"
+		},
+		"place_title": {
+			"is_null": "errors.fields.climb.place_title.is_null",
+			"not_found": "errors.field.climb.place_title.not_found",
+			"unauthorized": "errors.fields.climb.place_title.unauthorized"
+		}
+	},
+	"user_rates": {
+		"rate": {
+			"not_int": "errors.fields.user_rates.rate.not_int",
+			"empty_or_white_spaces": "errors.fields.user_rates.rate.empty_or_white_spaces",
+			"range": "errors.fields.user_rates.rate.range"
+		}
+	},
+	"routes": {
+		"register": "errors.routes.register",
+		"login": "errors.routes.login",
+		"create": {
+			"place": "errors.routes.create.place",
+			"climb": "errors.routes.create.climb"
+		},
+		"update": {
+			"place": "errors.routes.update.place",
+			"climb": "errors.routes.update.climb"
+		},
+		"delete": {
+		}
+	},
+	"auth": {
+		"login_required": "errors.auth.login_required",
+		"session_expired": "errors.auth.session_expired",
+		"unauthorized": "errors.auth.unauthorized"
+	}
 }

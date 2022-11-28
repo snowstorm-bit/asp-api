@@ -1,25 +1,20 @@
 'use strict';
 const { DataTypes } = require('sequelize');
+const Climb = require('../classes/climb');
 const Place = require('../classes/place');
-const User = require('../classes/user');
 
 const { throwError } = require('../utils/utils');
 const validation = require('../utils/validation');
 const errors = require('../json/errors.json');
+const { climbStyle } = require('../utils/enums');
 
 const titleMinLength = 3;
 const titleMaxLength = 50;
 const descriptionMinLength = 3;
 const descriptionMaxLength = 500;
-const stepsMinLength = 3;
-const stepsMaxLength = 500;
-const latitudeMin = -90;
-const latitudeMax = 90;
-const longitudeMin = -180;
-const longitudeMax = 180;
 
 module.exports = sequelize => {
-    Place.init(
+    Climb.init(
         {
             id: {
                 type: DataTypes.INTEGER,
@@ -30,15 +25,14 @@ module.exports = sequelize => {
             title: {
                 type: DataTypes.STRING(titleMaxLength),
                 allowNull: false,
-                unique: true,
                 validate: {
                     len: {
                         args: [titleMinLength, titleMaxLength],
-                        msg: errors.place.title.length
+                        msg: errors.climb.title.length
                     },
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(errors.place.title.empty_or_white_spaces);
+                            throwError(errors.climb.title.empty_or_white_spaces);
                         }
                     }
                 }
@@ -49,61 +43,77 @@ module.exports = sequelize => {
                 validate: {
                     len: {
                         args: [descriptionMinLength, descriptionMaxLength],
-                        msg: errors.place.description.length
+                        msg: errors.climb.description.length
                     },
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(errors.place.title.empty_or_white_spaces);
+                            throwError(errors.climb.description.empty_or_white_spaces);
                         }
                     }
                 }
             },
-            steps: {
-                type: DataTypes.STRING(stepsMaxLength),
+            style: {
+                type: DataTypes.STRING(),
+                allowNull: false,
+                isIn: {
+                    args: [Object.keys(climbStyle)],
+                    msg: errors.climb.style.not_in
+                },
+                validate: {
+                    isValid(value) {
+                        if (!validation.validateEmptyOrWhiteSpace(value)) {
+                            throwError(errors.climb.style.empty_or_white_spaces);
+                        }
+                    }
+                }
+            },
+            difficultyLevel: {
+                type: DataTypes.DECIMAL(3, 2),
                 allowNull: false,
                 validate: {
-                    len: {
-                        args: [stepsMinLength, stepsMaxLength],
-                        msg: errors.place.steps.length
+                    isDecimal: {
+                        args: true,
+                        msg: errors.climb.difficulty_level.not_decimal
                     },
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
-                            throwError(errors.place.title.empty_or_white_spaces);
+                            throwError(errors.climb.difficulty_level.empty_or_white_spaces);
+                        }
+
+                        let valueToValidate = value;
+                        let [integer, decimal] = String(valueToValidate).split('.');
+                        integer = Number(integer);
+                        decimal = Number(decimal);
+
+                        if (integer < 5 || integer > 5 || decimal < 6 || decimal > 15) {
+                            throwError(errors.climb.difficulty_level.range);
                         }
                     }
-                }
+                },
+                field: 'difficulty_level'
             },
-            latitude: {
-                type: DataTypes.FLOAT(),
-                allowNull: false,
-                validate: {
-                    isValid(value) {
-                        if (!validation.validateRange(value, latitudeMin, latitudeMax)) {
-                            throwError(errors.place.latitude.range);
-                        }
+            imgUrls: {
+                type: DataTypes.TEXT(),
+                // allowNull: false,
+                get(value) {
+                    return value.split(';');
+                },
+                set(value) {
+                    if (value !== undefined && value !== null) {
+                        return value.join(';');
                     }
-                }
+                },
+                field: 'img_urls'
             },
-            longitude: {
-                type: DataTypes.FLOAT(),
-                allowNull: false,
-                validate: {
-                    isValid(value) {
-                        if (!validation.validateRange(value, longitudeMin, longitudeMax)) {
-                            throwError(errors.place.longitude.range);
-                        }
-                    }
-                }
-            },
-            userId: {
+            placeId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
-                field: 'user_id',
                 references: {
-                    model: User,
-                    key: 'id'
+                    model: Place,
+                    key: 'id',
+                    as: 'place_id'
                 },
-                onDelete: 'CASCADE'
+                field: 'place_id'
             }
         },
         {
@@ -111,5 +121,6 @@ module.exports = sequelize => {
             timestamps: true
         }
     );
-    return Place;
+
+    return Climb;
 };
