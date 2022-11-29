@@ -19,8 +19,30 @@ module.exports.throwError = (code, cause = null, statusCode = null, isModelValid
     throw err;
 };
 
+let toSnakeCase = value => {
+    let snakeCaseValue = value[0].toLowerCase();
+
+    console.log('value', value.length);
+    for (let i = 1; i < value.length; i++) {
+        let char = value[i];
+        if (char.toUpperCase() === value[i]) {
+            if (i < value.length - 1) {
+                char = '_';
+            }
+            char += value[i].toLowerCase();
+        }
+        snakeCaseValue += char;
+    }
+    console.log(snakeCaseValue);
+    return snakeCaseValue;
+};
+
 let updateErrorIfNecessary = (model, errorCode, validatorKey, cause) => {
     if (validatorKey === 'is_null') {
+        if (cause.match('[A-Z]')) {
+            cause = toSnakeCase(cause);
+        }
+        console.log(cause);
         return errors[model][cause].is_null;
     } else if (validatorKey === 'not_unique') {
         return errors[model].unique_constraint;
