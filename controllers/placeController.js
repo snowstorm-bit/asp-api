@@ -51,9 +51,8 @@ exports.getForUpdate = async (req, res, next) => {
             }
         });
 
-        console.log(result);
         if (result === null) {
-            throwError(errors.place.not_found, 'place', 404, false);
+            throwError(errors.place.not_found, 'update_place', 404, false);
         } else if (result.userId !== req.user.id) {
             throwError(errors.auth.unauthorized, 'update_place', 403, false);
         }
@@ -94,7 +93,7 @@ exports.update = async (req, res, next) => {
         });
 
         if (result === null) {
-            throwError(errors.place.not_found, 'place', 404, false);
+            throwError(errors.place.not_found, 'update_place', 404, false);
         } else if (result.userId !== req.user.id) {
             throwError(errors.auth.unauthorized, 'update_place', 403, false);
         }
@@ -117,7 +116,6 @@ exports.update = async (req, res, next) => {
             }
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.update.place,
             cause: 'update_place'

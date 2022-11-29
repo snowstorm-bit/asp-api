@@ -22,7 +22,6 @@ module.exports.throwError = (code, cause = null, statusCode = null, isModelValid
 let toSnakeCase = value => {
     let snakeCaseValue = value[0].toLowerCase();
 
-    console.log('value', value.length);
     for (let i = 1; i < value.length; i++) {
         let char = value[i];
         if (char.toUpperCase() === value[i]) {
@@ -33,7 +32,6 @@ let toSnakeCase = value => {
         }
         snakeCaseValue += char;
     }
-    console.log(snakeCaseValue);
     return snakeCaseValue;
 };
 
@@ -42,7 +40,6 @@ let updateErrorIfNecessary = (model, errorCode, validatorKey, cause) => {
         if (cause.match('[A-Z]')) {
             cause = toSnakeCase(cause);
         }
-        console.log(cause);
         return errors[model][cause].is_null;
     } else if (validatorKey === 'not_unique') {
         return errors[model].unique_constraint;
@@ -61,7 +58,7 @@ module.exports.manageError = (err, globalError) => {
     if ('errors' in err) {
         errorToManage.statusCode = 422;
         err.errors.forEach(errToManage => {
-            console.log(errToManage);
+            // console.log(errToManage);
             let cause = errToManage.path;
             let model = errToManage.instance.constructor.name.toString().toLowerCase();
 

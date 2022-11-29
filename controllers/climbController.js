@@ -6,7 +6,6 @@ const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const Place = require('../classes/place');
-const Climb = require('../classes/climb');
 
 exports.getAll = async (req, res, next) => {
 };
@@ -79,7 +78,6 @@ exports.create = async (req, res, next) => {
             }
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.create.climb,
             cause: 'create_climb'
@@ -130,7 +128,6 @@ exports.getForUpdate = async (req, res, next) => {
             }
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.update.climb,
             cause: 'update_climb'
