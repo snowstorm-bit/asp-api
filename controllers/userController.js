@@ -4,7 +4,8 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const { throwError, manageError, status, userAccessLevel } = require('../utils/utils');
+const { throwError, manageError } = require('../utils/utils');
+const { status, userAccessLevel } = require('../utils/enums');
 const { Users } = require('../database');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
@@ -12,17 +13,6 @@ dotenv.config();
 
 exports.register = async (req, res, next) => {
     try {
-        // let result = await Users.findOne({
-        //     attributes: ['username', 'password'],
-        //     where: {
-        //         email: req.body.email
-        //     }
-        // });
-        //
-        // if (result !== null) {
-        //     throwError(errors.user.email.already_taken, 'email', 422, false);
-        // }
-
         let user = await Users.create(
             {
                 username: req.body.username,
@@ -35,7 +25,7 @@ exports.register = async (req, res, next) => {
         await user.save();
 
         res.status(201).json({
-            code: successes.register,
+            code: successes.routes.register,
             status: status.success,
             result: {
                 username: user.username,
@@ -62,7 +52,7 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     try {
         let user = await Users.findOne({
-            attributes: ['id', 'username', 'email', 'password'],
+            attributes: ['id', 'username', 'email', 'password', 'accessLevel'],
             where: {
                 email: req.body.email
             }
@@ -73,11 +63,11 @@ exports.login = async (req, res, next) => {
         }
 
         if (!bcrypt.compareSync(`${ req.body.password }`, user.password)) {
-            throwError(errors.user.password.invalid, 'password', 422, false);
+            throwError(errors.user.invalid, 'login', 422, false);
         }
 
         res.status(200).json({
-            code: successes.login,
+            code: successes.routes.login,
             status: status.success,
             result: {
                 username: user.username,

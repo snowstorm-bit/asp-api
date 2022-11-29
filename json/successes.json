@@ -1,8 +1,16 @@
 {
-  "register": "successes.register",
-  "login": "successes.login",
-  "place": {
-    "create": "successes.create",
-    "update": "successes.update"
-  }
+	"routes": {
+		"register": "successes.routes.register",
+		"login": "successes.routes.login",
+		"create": {
+			"place": "successes.routes.create.place",
+			"climb": "successes.routes.create.climb"
+		},
+		"update": {
+			"place": "successes.routes.update.place",
+			"climb": "successes.routes.update.climb"
+		},
+		"delete": {
+		}
+	}
 }

@@ -1,6 +1,6 @@
 'use strict';
 
-const { Climbs, Places, sequelize, ClimbAssociation } = require('../database');
+const { Climbs, Places } = require('../database');
 const { throwError, manageError } = require('../utils/utils');
 const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');

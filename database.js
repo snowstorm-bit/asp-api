@@ -1,6 +1,6 @@
 'use strict';
 
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize } = require('sequelize');
 const dotenv = require('dotenv');
 const Place = require('./classes/place');
 const Climb = require('./classes/climb');
@@ -37,11 +37,11 @@ db.ClimbBelongsToPlaceAssociation = Climb.belongsTo(Place, {
     foreignKey: 'place_id'
 });
 
-db.UserHasManyClimbAssociation = Place.hasMany(Climb, {
+db.UserHasManyClimbAssociation = User.hasMany(Climb, {
     foreignKey: 'user_id'
 });
 
-db.ClimbBelongsToUserAssociation = Climb.belongsTo(Place, {
+db.ClimbBelongsToUserAssociation = Climb.belongsTo(User, {
     foreignKey: 'user_id'
 });
 
