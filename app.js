@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const userRoutes = require('./routes/userRoutes');
 const placeRoutes = require('./routes/placeRoutes');
 const climbRoutes = require('./routes/climbRoutes');
+const path = require("path");
 
 const database = require('./database');
 const { status } = require('./utils/enums');
@@ -12,6 +13,8 @@ const { status } = require('./utils/enums');
 const app = express();
 
 app.use(bodyParser.json());
+app.use(express.json({ limit: '5mb' }));
+app.use(express.static(path.join(__dirname, "uploads")));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

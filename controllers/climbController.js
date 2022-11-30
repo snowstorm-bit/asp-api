@@ -7,6 +7,22 @@ const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const Place = require('../classes/place');
 
+let uploadImages = (images, climbTitle) => {
+    let paths = [];
+    for (let i = 0; i < images.length; i++) {
+        let image = images[i];
+        const matches = image.match(/^data:([A-Za-z\+\/]+);base64,(.+)$/);
+        let buff = Buffer.from(matches[2], 'base64');
+
+        // 
+        let path = `uploads/${ climbTitle }_${ i }`;
+        paths.push(path);
+        fs.writeFileSync(path, buff);
+    }
+
+    return paths;
+};
+
 exports.getAll = async (req, res, next) => {
 };
 
