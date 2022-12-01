@@ -64,6 +64,7 @@ exports.create = async (req, res, next) => {
             description: req.body.description,
             style: req.body.style,
             difficultyLevel: req.body.difficultyLevel,
+            images: req.body.images,
             placeId: place.id,
             userId: req.user.id
         });
@@ -101,7 +102,7 @@ exports.getForUpdate = async (req, res, next) => {
         }
 
         let climb = await Climbs.findOne({
-            attributes: ['title', 'description', 'style', 'difficultyLevel'],
+            attributes: ['title', 'description', 'style', 'difficultyLevel', 'images'],
             include: {
                 model: Place,
                 attributes: ['title'],
@@ -123,6 +124,7 @@ exports.getForUpdate = async (req, res, next) => {
                 style: climb.style,
                 styles: climbStyle,
                 difficultyLevel: climb.difficultyLevel,
+                images: climb.images,
                 placeTitle: climb.Place.title,
                 placeTitles: placeTitles
             }
@@ -173,6 +175,7 @@ exports.update = async (req, res, next) => {
             description: req.body.description,
             style: req.body.style,
             difficultyLevel: req.body.difficultyLevel,
+            images: req.body.images,
             placeId: place.id,
             userId: req.user.id
         });

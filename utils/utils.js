@@ -2,6 +2,7 @@
 
 const bcrypt = require('bcrypt');
 const errors = require('../json/errors.json');
+const fs = require('fs');
 
 module.exports.throwError = (code, cause = null, statusCode = null, isModelValidationError = true) => {
     let err = isModelValidationError
@@ -104,3 +105,16 @@ module.exports.manageError = (err, globalError) => {
 
 module.exports.hashPassword = password =>
     bcrypt.hashSync(`${ password }`, 12);
+
+
+module.exports.uploadFiles = files => {
+    for (let i = 0; i < files.length; i++) {
+        let image = files[i].base64;
+        const matches = image.match(/^data:([A-Za-z\+\/]+);base64,(.+)$/);
+        let buff = Buffer.from(matches[2], 'base64');
+
+        let path = `/uploads/${ files[i].filename }`;
+
+        fs.writeFileSync(path, buff);
+    }
+};

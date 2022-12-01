@@ -93,7 +93,7 @@ module.exports = sequelize => {
                 },
                 field: 'difficulty_level'
             },
-            imgUrls: {
+            images: {
                 type: DataTypes.TEXT(),
                 // allowNull: false,
                 get(value) {
@@ -104,7 +104,7 @@ module.exports = sequelize => {
                         return value.join(';');
                     }
                 },
-                field: 'img_urls'
+                field: 'images'
             },
             placeId: {
                 type: DataTypes.INTEGER,
