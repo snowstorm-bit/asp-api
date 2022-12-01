@@ -57,5 +57,4 @@ module.exports = sequelize => {
 
     UserRates.removeAttribute('id');
     return UserRates;
-
 };

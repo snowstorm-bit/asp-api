@@ -2,26 +2,24 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const database = require('./database');
 const userRoutes = require('./routes/userRoutes');
 const placeRoutes = require('./routes/placeRoutes');
 const climbRoutes = require('./routes/climbRoutes');
 const path = require('path');
 
-const database = require('./database');
 const { status } = require('./utils/enums');
 const { uploadFiles } = require('./utils/utils');
-const successes = require('./json/successes.json');
 const isAuth = require('./middlewares/is-auth');
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.json({ limit: '50mb' }));
-
-app.use(express.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: Number.MAX_SAFE_INTEGER }));
 
-app.use(express.urlencoded({ limit: '50mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true, parameterLimit: Number.MAX_SAFE_INTEGER }));
 app.use(express.static(path.join(__dirname, 'uploads')));
 
 app.use((req, res, next) => {
@@ -35,14 +33,20 @@ app.use((req, res, next) => {
 });
 
 app.post('/upload', isAuth, (req, res, next) => {
-    console.log(req);
-    console.log(req.files);
-    if (req.files !== undefined && req.files !== null) {
-        uploadFiles(req.files);
+    try {
+        console.log(req.body.file.filename);
+        if (req.body.file !== undefined && req.body.file !== null) {
+            uploadFiles(req.body.file);
+        }
+        res.status(200).json({
+            status: status.success
+        });
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({
+            status: status.error
+        });
     }
-    res.status(200).json({
-        status: status.success
-    });
 });
 
 app.use('/user', userRoutes);

@@ -1,0 +1,22 @@
+{
+	"development": {
+		"username": "root",
+		"password": null,
+		"database": "db_development",
+		"options": {
+			"host": "localhost",
+			"dialect": "mariadb",
+			"port": 3307
+		}
+	},
+	"production": {
+		"username": "root",
+		"password": null,
+		"database": "db_production",
+		"options": {
+			"host": "localhost",
+			"dialect": "mariadb",
+			"port": 3307
+		}
+	}
+}
