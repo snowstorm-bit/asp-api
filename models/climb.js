@@ -96,7 +96,7 @@ module.exports = sequelize => {
             },
             images: {
                 type: DataTypes.TEXT(),
-                // allowNull: false,
+                allowNull: false,
                 get() {
                     const rawValue = this.getDataValue('images');
                     return rawValue.split(';');

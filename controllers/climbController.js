@@ -185,7 +185,7 @@ exports.update = async (req, res, next) => {
         images.push(...req.body.images);
 
         if (req.body.difficultyLevel === '5.1') {
-            throwError(errors.climb.difficulty_level.range, 'difficulty_level', 44, false);
+            throwError(errors.climb.difficulty_level.range, 'difficulty_level', 422, false);
         }
 
         let climb = await result.set({
@@ -194,8 +194,7 @@ exports.update = async (req, res, next) => {
             style: req.body.style,
             difficultyLevel: Number(req.body.difficultyLevel),
             images: images,
-            placeId: place.id,
-            userId: req.user.id
+            placeId: place.id
         });
 
         await climb.save();
