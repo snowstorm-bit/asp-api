@@ -96,7 +96,7 @@ module.exports = sequelize => {
             },
             images: {
                 type: DataTypes.TEXT(),
-                // allowNull: false,
+                allowNull: false,
                 get() {
                     const rawValue = this.getDataValue('images');
                     return rawValue.split(';');
@@ -126,8 +126,7 @@ module.exports = sequelize => {
                     key: 'id',
                     as: 'user_id'
                 },
-                field: 'user_id',
-                onDelete: 'CASCADE'
+                field: 'user_id'
             }
         },
         {

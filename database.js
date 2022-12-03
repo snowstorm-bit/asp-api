@@ -22,7 +22,10 @@ db.UserRates = require('./models/userRates')(sequelize);
 
 // Defining place climbs relation
 db.PlaceHasManyClimbAssociation = Place.hasMany(Climb, {
-    foreignKey: 'place_id'
+    foreignKey: {
+        name: 'place_id',
+        allowNull: false
+    }
 });
 
 db.ClimbBelongsToPlaceAssociation = Climb.belongsTo(Place, {
@@ -31,7 +34,10 @@ db.ClimbBelongsToPlaceAssociation = Climb.belongsTo(Place, {
 
 // Defining user climbs relation
 db.UserHasManyClimbAssociation = User.hasMany(Climb, {
-    foreignKey: 'user_id',
+    foreignKey: {
+        name: 'user_id',
+        allowNull: false
+    },
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE'
 });
@@ -42,7 +48,10 @@ db.ClimbBelongsToUserAssociation = Climb.belongsTo(User, {
 
 // Defining user rates relation
 User.hasMany(UserRates, {
-    foreignKey: 'user_id',
+    foreignKey: {
+        name: 'user_id',
+        allowNull: false
+    },
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE'
 });
@@ -52,7 +61,10 @@ UserRates.belongsTo(User, {
 });
 
 Climb.hasOne(UserRates, {
-    foreignKey: 'climb_id'
+    foreignKey: {
+        name: 'climb_id',
+        allowNull: false
+    }
 });
 
 UserRates.belongsTo(Climb, {

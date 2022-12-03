@@ -19,17 +19,20 @@ module.exports = sequelize => {
                 allowNull: false,
                 references: {
                     model: User,
-                    key: 'id'
+                    key: 'id',
+                    as: 'user_id'
                 },
-                onDelete: 'CASCADE'
+                field: 'user_id'
             },
             climbId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 references: {
                     model: Climb,
-                    key: 'id'
-                }
+                    key: 'id',
+                    as: 'climb_id'
+                },
+                field: 'climb_id'
             },
             rate: {
                 type: DataTypes.INTEGER(1),
