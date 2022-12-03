@@ -116,4 +116,5 @@ module.exports.uploadFiles = file => {
     fs.writeFileSync(path, buff);
 };
 
-module.exports.round = num => (Math.round(Number((Math.abs(num) * 100).toPrecision(15))) / 100) * Math.sign(num);
+module.exports.round = num =>
+    (Math.round(Number((Math.abs(num) * 100).toPrecision(15))) / 100) * Math.sign(num);

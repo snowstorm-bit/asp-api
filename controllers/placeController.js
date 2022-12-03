@@ -15,7 +15,6 @@ exports.getAll = async (req, res, next) => {
 
 exports.getOne = async (req, res, next) => {
     try {
-        console.log('Getting one place');
         let result = await Places.findOne({
             attributes: ['id', 'title', 'description', 'steps', 'latitude', 'longitude', 'userId'],
             where: {
