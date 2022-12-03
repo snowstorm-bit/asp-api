@@ -126,8 +126,7 @@ module.exports = sequelize => {
                     key: 'id',
                     as: 'user_id'
                 },
-                field: 'user_id',
-                onDelete: 'CASCADE'
+                field: 'user_id'
             }
         },
         {

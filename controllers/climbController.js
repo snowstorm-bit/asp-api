@@ -18,6 +18,7 @@ exports.getForCreate = async (req, res, next) => {
         let placeTitles = await Places.findAll({
             attributes: ['title']
         });
+        
         res.status(200).json({
             code: successes.routes.create.climb,
             status: status.success,

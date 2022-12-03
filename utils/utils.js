@@ -3,7 +3,6 @@
 const bcrypt = require('bcrypt');
 const errors = require('../json/errors.json');
 const fs = require('fs');
-const { status } = require('./enums');
 
 module.exports.throwError = (code, cause = null, statusCode = null, isModelValidationError = true) => {
     let err = isModelValidationError
@@ -107,7 +106,6 @@ module.exports.manageError = (err, globalError) => {
 module.exports.hashPassword = password =>
     bcrypt.hashSync(`${ password }`, 12);
 
-
 module.exports.uploadFiles = file => {
     let image = file.base64;
     const matches = image.match(/^data:([A-Za-z\+\/]+);base64,(.+)$/);
@@ -117,3 +115,5 @@ module.exports.uploadFiles = file => {
 
     fs.writeFileSync(path, buff);
 };
+
+module.exports.round = num => (Math.round(Number((Math.abs(num) * 100).toPrecision(15))) / 100) * Math.sign(num);
