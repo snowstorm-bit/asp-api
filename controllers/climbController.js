@@ -59,11 +59,15 @@ exports.create = async (req, res, next) => {
             throwError(errors.climb.unique_constraint, 'title', 422, false);
         }
 
+        if (req.body.difficultyLevel === '5.1') {
+            throwError(errors.climb.difficulty_level.range, 'difficulty_level', 422, false);
+        }
+
         let climb = await Climbs.create({
             title: req.body.title,
             description: req.body.description,
             style: req.body.style,
-            difficultyLevel: req.body.difficultyLevel,
+            difficultyLevel: Number(req.body.difficultyLevel),
             images: req.body.images,
             placeId: place.id,
             userId: req.user.id
@@ -150,32 +154,46 @@ exports.update = async (req, res, next) => {
             throwError(errors.climb.place_title.not_found, 'place_title', 404, false);
         }
 
-        // Get to validate if exists and unique constraint respected
         let result = await Climbs.findOne({
-            attributes: ['title', 'userId'],
+            attributes: ['id', 'userId', 'images'],
             where: {
-                placeId: place.id,
                 title: req.params.title
             }
         });
 
-        // If the title of the climb has changed but the result is equals to the changed title,
-        // this means the title is already associated to an other place
-        let titleValidation = req.params.title !== req.body.title && result.title === req.body.title;
         if (result === null) {
             throwError(errors.climb.not_found, 'update_climb', 404, false);
         } else if (result.userId !== req.user.id) {
             throwError(errors.auth.unauthorized, 'update_climb', 403, false);
-        } else if (titleValidation) {
+        }
+
+        // If the title of the climb has changed but the result is equals to the changed title,
+        // this means the title is already associated to an other place
+        let resultForUniqueConstraint = await Climbs.findOne({
+            attributes: ['title'],
+            where: {
+                placeId: place.id,
+                title: req.body.title
+            }
+        });
+
+        if (resultForUniqueConstraint !== null && req.params.title !== req.body.title) {
             throwError(errors.climb.unique_constraint, 'title', 422, false);
+        }
+
+        let images = result.images;
+        images.push(...req.body.images);
+
+        if (req.body.difficultyLevel === '5.1') {
+            throwError(errors.climb.difficulty_level.range, 'difficulty_level', 44, false);
         }
 
         let climb = await result.set({
             title: req.body.title,
             description: req.body.description,
             style: req.body.style,
-            difficultyLevel: req.body.difficultyLevel,
-            images: req.body.images,
+            difficultyLevel: Number(req.body.difficultyLevel),
+            images: images,
             placeId: place.id,
             userId: req.user.id
         });
@@ -190,6 +208,7 @@ exports.update = async (req, res, next) => {
             }
         });
     } catch (err) {
+        console.log(err);
         next(manageError(err, {
             code: errors.routes.update.climb,
             cause: 'update_climb'

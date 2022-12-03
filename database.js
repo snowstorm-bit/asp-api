@@ -2,33 +2,25 @@
 
 const { Sequelize } = require('sequelize');
 const dotenv = require('dotenv');
+dotenv.config();
+const env = process.env.NODE_ENV || 'development';
+const config = require(__dirname + '/config/config.json')[env];
+
 const Place = require('./classes/place');
 const Climb = require('./classes/climb');
 const User = require('./classes/user');
+const UserRates = require('./classes/userRates');
 
-
-dotenv.config();
-
-const sequelize = new Sequelize(
-    process.env.DB_NAME || 'find_your_way',
-    process.env.DB_USER || 'root',
-    null,
-    {
-        dialect: process.env.DIALECT || 'mariadb',
-        host: 'localhost',
-        port: 3307
-    }
-);
+let sequelize = new Sequelize(config.database, config.username, config.password, config.options);
 
 const db = {};
-db.Sequelize = Sequelize;
-db.sequelize = sequelize;
 
-db.Users = require('./models/user')(db.sequelize);
-db.Places = require('./models/place')(db.sequelize);
-db.Climbs = require('./models/climb')(db.sequelize);
-db.UserRates = require('./models/userRates')(db.sequelize);
+db.Users = require('./models/user')(sequelize);
+db.Places = require('./models/place')(sequelize);
+db.Climbs = require('./models/climb')(sequelize);
+db.UserRates = require('./models/userRates')(sequelize);
 
+// Defining place climbs relation
 db.PlaceHasManyClimbAssociation = Place.hasMany(Climb, {
     foreignKey: 'place_id'
 });
@@ -37,12 +29,37 @@ db.ClimbBelongsToPlaceAssociation = Climb.belongsTo(Place, {
     foreignKey: 'place_id'
 });
 
+// Defining user climbs relation
 db.UserHasManyClimbAssociation = User.hasMany(Climb, {
-    foreignKey: 'user_id'
+    foreignKey: 'user_id',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
 });
 
 db.ClimbBelongsToUserAssociation = Climb.belongsTo(User, {
     foreignKey: 'user_id'
 });
+
+// Defining user rates relation
+User.hasMany(UserRates, {
+    foreignKey: 'user_id',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+});
+
+UserRates.belongsTo(User, {
+    foreignKey: 'user_id'
+});
+
+Climb.hasOne(UserRates, {
+    foreignKey: 'climb_id'
+});
+
+UserRates.belongsTo(Climb, {
+    foreignKey: 'climb_id'
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
 
 module.exports = db;

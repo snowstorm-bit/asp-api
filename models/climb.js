@@ -82,11 +82,12 @@ module.exports = sequelize => {
                         }
 
                         let valueToValidate = value;
+
                         let [integer, decimal] = String(valueToValidate).split('.');
                         integer = Number(integer);
                         decimal = Number(decimal);
 
-                        if (integer < 5 || integer > 5 || decimal < 6 || decimal > 15) {
+                        if (integer < 5 || integer > 5 || decimal !== 1 && (decimal < 6 || decimal > 15)) {
                             throwError(errors.climb.difficulty_level.range);
                         }
                     }
@@ -96,12 +97,13 @@ module.exports = sequelize => {
             images: {
                 type: DataTypes.TEXT(),
                 // allowNull: false,
-                get(value) {
-                    return value.split(';');
+                get() {
+                    const rawValue = this.getDataValue('images');
+                    return rawValue.split(';');
                 },
                 set(value) {
                     if (value !== undefined && value !== null) {
-                        return value.join(';');
+                        this.setDataValue('images', value.join(';'));
                     }
                 },
                 field: 'images'
@@ -114,8 +116,7 @@ module.exports = sequelize => {
                     key: 'id',
                     as: 'place_id'
                 },
-                field: 'place_id',
-                onDelete: 'CASCADE'
+                field: 'place_id'
             },
             userId: {
                 type: DataTypes.INTEGER,
