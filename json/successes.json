@@ -15,6 +15,9 @@
 		"details": {
 			"place": "successes.routes.get.details.place",
 			"climb": "successes.routes.get.details.climb"
+		},
+		"all": {
+			"climbs": "successes.route.get.all.climbs"
 		}
 	}
 }

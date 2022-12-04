@@ -9,10 +9,6 @@ const UserRates = require('../classes/userRates');
 const dotenv = require('dotenv');
 dotenv.config();
 
-exports.getAll = async (req, res, next) => {
-
-};
-
 exports.getOne = async (req, res, next) => {
     try {
         let result = await Places.findOne({

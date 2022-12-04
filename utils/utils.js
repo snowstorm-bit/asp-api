@@ -118,3 +118,8 @@ module.exports.uploadFiles = file => {
 
 module.exports.round = num =>
     (Math.round(Number((Math.abs(num) * 100).toPrecision(15))) / 100) * Math.sign(num);
+
+module.exports.paginateResponse = (results, offset) => ({
+    offset: offset + results.length,
+    items: results
+});
