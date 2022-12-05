@@ -48,7 +48,7 @@ exports.getOne = async (req, res, next) => {
             climbs.push({
                 title: result.title,
                 style: result.style,
-                image: result.images.split(';'),
+                image: result.images.split(';')[0],
                 description: result.description,
                 difficultyLevel: result.difficultyLevel,
                 rate: round(Number(result.rate)),

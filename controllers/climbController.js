@@ -114,7 +114,7 @@ exports.getAll = async (req, res, next) => {
             if (req.query.rate === undefined || climbRate === Number(req.query.rate)) {
                 climbs.push({
                     title: result.title,
-                    image: result.images.split(';'),
+                    image: result.images.split(';')[0],
                     description: result.description,
                     rate: round(climbRate),
                     votes: result.votes,
@@ -245,8 +245,7 @@ exports.getForUpdate = async (req, res, next) => {
 
         let climb = await Climbs.findOne({
             attributes: [
-                'title', 'description', 'style', 'difficultyLevel', 'images',
-                [sequelize.col('Place.title'), 'placeTitle']
+                'title', 'description', 'style', 'difficultyLevel', 'images'
             ],
             include: {
                 model: Place,
@@ -260,6 +259,8 @@ exports.getForUpdate = async (req, res, next) => {
 
         let placeTitles = await Places.findAll({ attributes: ['title'] });
 
+        console.log('climb.placeTitle', climb.placeTitle);
+        console.log('climb.placeTitle', climb.placeTitle);
         res.status(200).json({
             code: successes.routes.update.climb,
             status: status.success,
@@ -270,7 +271,7 @@ exports.getForUpdate = async (req, res, next) => {
                 styles: climbStyle,
                 difficultyLevel: climb.difficultyLevel,
                 images: climb.images,
-                placeTitle: climb.placeTitle,
+                placeTitle: climb.Place.title,
                 placeTitles: placeTitles
             }
         });
