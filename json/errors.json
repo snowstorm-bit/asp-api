@@ -110,6 +110,9 @@
 		"details": {
 			"place": "errors.routes.get.details.place",
 			"climb": "errors.routes.get.details.climb"
+		},
+		"all": {
+			"climbs": "errors.route.get.all.climbs"
 		}
 	},
 	"auth": {

@@ -5,7 +5,6 @@ const router = express.Router();
 const { needsAuth, isAuth } = require('../middlewares/is-auth');
 const placeController = require('../controllers/placeController');
 
-router.get('/all', placeController.getAll);
 router.get('/details/:title', isAuth, placeController.getOne);
 router.post('/', needsAuth, placeController.create);
 router.get('/:title', needsAuth, placeController.getForUpdate);
