@@ -22,9 +22,11 @@ exports.getOne = async (req, res, next) => {
             throwError(errors.place.not_found, 'place_details', 404, false);
         }
 
+        let descriptionLiteralStatement = 'IF(CHAR_LENGTH(description) > 60, CONCAT(SUBSTRING(description, 1, 100), \'...\'), SUBSTRING(description, 1, 100)) AS description';
         let results = await Climbs.findAll({
             attributes: [
-                'id', 'title', 'style', 'difficultyLevel',
+                'id', 'title', 'style', 'difficultyLevel', 'images',
+                sequelize.literal(descriptionLiteralStatement),
                 [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
                 [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate']
             ],
@@ -46,6 +48,8 @@ exports.getOne = async (req, res, next) => {
             climbs.push({
                 title: result.title,
                 style: result.style,
+                image: result.images.split(';'),
+                description: result.description,
                 difficultyLevel: result.difficultyLevel,
                 rate: round(Number(result.rate)),
                 votes: result.votes

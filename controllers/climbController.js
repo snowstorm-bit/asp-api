@@ -10,6 +10,7 @@ const UserRates = require('../classes/userRates');
 
 exports.getAll = async (req, res, next) => {
     try {
+        console.log(req.query);
         let orderDefault = {
             rate: 'DESC',
             votes: 'DESC',
@@ -58,7 +59,6 @@ exports.getAll = async (req, res, next) => {
                     difficultyLevelRange.push(String(round(Number(difficultyLevelRange[i - 1]) + step)));
                 }
             }
-            console.log(difficultyLevelRange);
             where.difficultyLevel = difficultyLevelRange;
             order.push(['difficultyLevel', 'ASC']);
         }
@@ -67,13 +67,19 @@ exports.getAll = async (req, res, next) => {
         order.push(...orderDefaultArray);
 
         let searchCriterias = {
-            offset: req.query.offset || 0,
-            limit: req.query.limit || 15
+            offset: Number(req.query.offset) || 0,
+            limit: req.query.limit
+                ? req.query.limit.includes('top-10')
+                    ? 10
+                    : Number(req.query.limit)
+                : 15
         };
 
+        let descriptionLiteralStatement = 'IF(CHAR_LENGTH(Climb.description) > 60, CONCAT(SUBSTRING(Climb.description, 1, 100), \'...\'), SUBSTRING(Climb.description, 1, 100)) AS description';
         let results = await Climbs.findAll({
             attributes: [
-                'id', 'title',
+                'id', 'title', 'images',
+                sequelize.literal(descriptionLiteralStatement),
                 [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
                 [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
                 [sequelize.col('Place.title'), 'placeTitle']
@@ -105,6 +111,8 @@ exports.getAll = async (req, res, next) => {
             if (req.query.rate === undefined || climbRate >= Number(req.query.rate[0]) && climbRate <= Number(req.query.rate[1])) {
                 climbs.push({
                     title: result.title,
+                    image: result.images.split(';'),
+                    description: result.description,
                     rate: round(climbRate),
                     votes: result.votes,
                     placeTitle: result.placeTitle
@@ -112,10 +120,17 @@ exports.getAll = async (req, res, next) => {
             }
         });
 
+        let result = paginateResponse(climbs, searchCriterias.offset);
+
+        if (req.query.limit && !req.query.limit.includes('top-10')) {
+            result.styles = climbStyle;
+        }
+
+        console.log(result);
         res.status(200).json({
             code: successes.routes.all.climbs,
             status: status.success,
-            result: paginateResponse(climbs, searchCriterias.offset)
+            result: result
         });
     } catch (err) {
         console.log(err);

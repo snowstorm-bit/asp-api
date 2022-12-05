@@ -102,7 +102,7 @@ module.exports = sequelize => {
                     return rawValue.split(';');
                 },
                 set(value) {
-                    if (value !== undefined && value !== null) {
+                    if (value !== undefined && value !== null && typeof value !== 'string') {
                         this.setDataValue('images', value.join(';'));
                     }
                 },
