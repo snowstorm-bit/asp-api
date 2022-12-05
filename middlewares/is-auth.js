@@ -38,9 +38,10 @@ module.exports.isAuth = (req, res, next) => {
                 let decodedToken = jwt.verify(token, process.env.SECRET_JTW_KEY);
                 if (decodedToken) {
                     req.user = decodedToken;
+                } else {
+                    req.user = { status: 401 };
                 }
-                req.user = { status: 401 };
-            } catch {
+            } catch (e) {
                 req.user = { status: 401 };
             }
         }
