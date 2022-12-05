@@ -19,6 +19,7 @@ exports.getAll = async (req, res, next) => {
 
         let order = [];
         let where = {};
+
         if (req.query.rate !== undefined) {
             delete orderDefault.rate;
             delete orderDefault.votes;
@@ -26,7 +27,8 @@ exports.getAll = async (req, res, next) => {
         }
         if (req.query.place !== undefined) {
             if (typeof req.query.place === 'string') {
-                order.push(['rate', 'DESC']);
+                where['$Place.title$'] = req.query.place;
+                order.push(['placeTitle', 'DESC']);
             } else {
                 where['$Place.title$'] = { [Op.or]: req.query.place };
                 order.push(['placeTitle', 'ASC']);
@@ -75,8 +77,9 @@ exports.getAll = async (req, res, next) => {
                 : 15
         };
 
+        console.log('where', where);
         let descriptionLiteralStatement = 'IF(CHAR_LENGTH(Climb.description) > 60, CONCAT(SUBSTRING(Climb.description, 1, 100), \'...\'), SUBSTRING(Climb.description, 1, 100)) AS description';
-        let results = await Climbs.findAll({
+        let { rows, count } = await Climbs.findAndCountAll({
             attributes: [
                 'id', 'title', 'images',
                 sequelize.literal(descriptionLiteralStatement),
@@ -106,9 +109,9 @@ exports.getAll = async (req, res, next) => {
 
         let climbs = [];
 
-        results.forEach(result => {
+        rows.forEach(result => {
             let climbRate = Number(result.rate);
-            if (req.query.rate === undefined || climbRate >= Number(req.query.rate[0]) && climbRate <= Number(req.query.rate[1])) {
+            if (req.query.rate === undefined || climbRate === Number(req.query.rate)) {
                 climbs.push({
                     title: result.title,
                     image: result.images.split(';'),
@@ -123,6 +126,9 @@ exports.getAll = async (req, res, next) => {
         let result = paginateResponse(climbs, searchCriterias.offset);
 
         if (req.query.limit && !req.query.limit.includes('top-10')) {
+            result.placeTitles = await Places.findAll({
+                attributes: ['title']
+            });
             result.styles = climbStyle;
         }
 
