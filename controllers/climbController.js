@@ -1,47 +1,35 @@
 'use strict';
-const { Op } = require('sequelize');
-const { Climbs, Places, sequelize } = require('../database');
+const { QueryTypes } = require('sequelize');
+const { Climbs, Places, sequelize, UserRates } = require('../database');
 const { throwError, manageError, round, paginateResponse } = require('../utils/utils');
 const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const Place = require('../classes/place');
-const UserRates = require('../classes/userRates');
 
 exports.getAll = async (req, res, next) => {
     try {
-        console.log(req.query);
-        let orderDefault = {
-            rate: 'DESC',
-            votes: 'DESC',
-            title: 'ASC'
-        };
-
-        let order = [];
-        let where = {};
+        let whereQueryString = '';
 
         if (req.query.rate !== undefined) {
-            delete orderDefault.rate;
-            delete orderDefault.votes;
-            order.push(['rate', 'DESC'], ['votes', 'DESC']);
+            whereQueryString += `WHERE row.totalRate BETWEEN ${ req.query.rate[0] } AND ${ req.query.rate[1] }`;
         }
+
+        let whereSubQuery = [];
         if (req.query.place !== undefined) {
-            if (typeof req.query.place === 'string') {
-                where['$Place.title$'] = req.query.place;
-                order.push(['placeTitle', 'DESC']);
-            } else {
-                where['$Place.title$'] = { [Op.or]: req.query.place };
-                order.push(['placeTitle', 'ASC']);
-            }
+            whereSubQuery.push(`p.title = '${ req.query.place }'`);
         }
         if (req.query.style !== undefined) {
             if (typeof req.query.style === 'string') {
-                where.style = req.query.style;
+                whereSubQuery.push(`c.style = '${ req.query.style }'`);
             } else {
-                where.style = { [Op.or]: req.query.style };
-                let styles = [];
-                Object.values(climbStyle).forEach(style => styles.push(`'${ style }'`));
-                order.push([sequelize.literal(`FIELD(Climb.style,${ styles.join(',') }) ASC`)]);
+                let styleWhereStatement = '';
+                styleWhereStatement += `c.style IN ('${ req.query.style[0] }'`;
+                for (let i = 1; i < req.query.style.length; i++) {
+                    styleWhereStatement += `, '${ req.query.style[i] }'`;
+                }
+                styleWhereStatement += ')';
+                whereSubQuery.push(styleWhereStatement);
             }
         }
         if (req.query.difficultyLevel !== undefined) {
@@ -61,12 +49,28 @@ exports.getAll = async (req, res, next) => {
                     difficultyLevelRange.push(String(round(Number(difficultyLevelRange[i - 1]) + step)));
                 }
             }
-            where.difficultyLevel = difficultyLevelRange;
-            order.push(['difficultyLevel', 'ASC']);
+
+            let difficultyLevelWhereStatement = '';
+            difficultyLevelWhereStatement += `c.difficulty_level IN ('${ difficultyLevelRange[0] }'`;
+            for (let i = 1; i < difficultyLevelRange.length; i++) {
+                difficultyLevelWhereStatement += `, '${ difficultyLevelRange[i] }'`;
+            }
+            difficultyLevelWhereStatement += ')';
+            whereSubQuery.push(difficultyLevelWhereStatement);
         }
 
-        let orderDefaultArray = Object.entries(orderDefault);
-        order.push(...orderDefaultArray);
+        let whereSubQueryString = '';
+        if (whereSubQuery.length > 0) {
+            whereSubQueryString += `WHERE ${ whereSubQuery[0] }`;
+            for (let i = 1; i < whereSubQuery.length; i++) {
+                whereSubQueryString += ` AND ${ whereSubQuery[i] }`;
+            }
+            whereSubQueryString += ' ';
+        }
+
+        let rowCols = 'row.title, row.description, row.style, row.images, row.placeTitle, row.totalRate as rate, row.votes';
+        let descriptionLiteralStatement = 'IF(CHAR_LENGTH(c.description) > 60, CONCAT(SUBSTRING(c.description, 1, 100), \'...\'), SUBSTRING(c.description, 1, 100)) AS description';
+        let subQueryCols = `c.title, ${ descriptionLiteralStatement }, c.style, c.images, p.title AS placeTitle, AVG(ur.rate) AS totalRate, COUNT(ur.climb_id) AS votes`;
 
         let searchCriterias = {
             offset: Number(req.query.offset) || 0,
@@ -77,53 +81,31 @@ exports.getAll = async (req, res, next) => {
                 : 15
         };
 
-        console.log('where', where);
-        let descriptionLiteralStatement = 'IF(CHAR_LENGTH(Climb.description) > 60, CONCAT(SUBSTRING(Climb.description, 1, 100), \'...\'), SUBSTRING(Climb.description, 1, 100)) AS description';
-        let { rows, count } = await Climbs.findAndCountAll({
-            attributes: [
-                'id', 'title', 'images',
-                sequelize.literal(descriptionLiteralStatement),
-                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
-                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
-                [sequelize.col('Place.title'), 'placeTitle']
-            ],
-            include: [
-                {
-                    model: UserRates,
-                    attributes: ['climbId', 'rate'],
-                    required: true
-                },
-                {
-                    model: Place,
-                    attributes: ['title'],
-                    required: true
-                }
-            ],
-            where: where,
-            group: ['UserRate.climb_id'],
-            order: order,
-            offset: searchCriterias.offset,
-            limit: searchCriterias.limit,
-            raw: true
+        let queryString = `SELECT ${ rowCols }
+                           FROM (SELECT ${ subQueryCols }
+                                 FROM user_rates ur
+                                          INNER JOIN climbs c ON ur.climb_id = c.id
+                                          INNER JOIN places p ON c.place_id = p.id
+                                     ${ whereSubQueryString }
+                                 GROUP BY c.id) AS row
+                               ${ whereQueryString }
+                           ORDER BY row.totalRate DESC, row.votes DESC, row.title ASC
+                               LIMIT ${ searchCriterias.limit }
+                           OFFSET ${ searchCriterias.offset }`;
+
+        let climbs = await sequelize.query(queryString,
+            {
+                logging: console.log,
+                raw: false,
+                type: QueryTypes.SELECT
+            });
+
+        climbs.forEach(climb => {
+            climb.images = climb.images.split(';')[0];
+            climb.rate = round(Number(climb.rate));
         });
 
-        let climbs = [];
-
-        rows.forEach(result => {
-            let climbRate = Number(result.rate);
-            if (req.query.rate === undefined || climbRate === Number(req.query.rate)) {
-                climbs.push({
-                    title: result.title,
-                    image: result.images.split(';')[0],
-                    description: result.description,
-                    rate: round(climbRate),
-                    votes: result.votes,
-                    placeTitle: result.placeTitle
-                });
-            }
-        });
-
-        let result = paginateResponse(climbs, searchCriterias.offset);
+        let result = paginateResponse(climbs, searchCriterias.offset, searchCriterias.limit);
 
         if (req.query.limit && !req.query.limit.includes('top-10')) {
             result.placeTitles = await Places.findAll({
@@ -132,7 +114,6 @@ exports.getAll = async (req, res, next) => {
             result.styles = climbStyle;
         }
 
-        console.log(result);
         res.status(200).json({
             code: successes.routes.all.climbs,
             status: status.success,
