@@ -102,8 +102,12 @@ module.exports = sequelize => {
                     return rawValue.split(';');
                 },
                 set(value) {
-                    if (value !== undefined && value !== null && typeof value !== 'string') {
-                        this.setDataValue('images', value.join(';'));
+                    if (value !== undefined && value !== null) {
+                        this.setDataValue(
+                            'images',
+                            typeof value === 'string'
+                                ? value
+                                : value.join(';'));
                     }
                 },
                 field: 'images'
@@ -124,7 +128,7 @@ module.exports = sequelize => {
                 references: {
                     model: User,
                     key: 'id',
-                    as: 'user_id'
+                    as: 'userId'
                 },
                 field: 'user_id'
             }

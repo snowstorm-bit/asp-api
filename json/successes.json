@@ -7,10 +7,13 @@
 			"climb": "successes.routes.create.climb"
 		},
 		"update": {
+			"user": "successes.routes.update.user",
 			"place": "successes.routes.update.place",
 			"climb": "successes.routes.update.climb"
 		},
 		"delete": {
+			"place": "successes.routes.delete.place",
+			"climb": "successes.routes.delete.climb"
 		},
 		"details": {
 			"place": "successes.routes.get.details.place",

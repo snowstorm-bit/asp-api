@@ -21,9 +21,7 @@ exports.register = async (req, res, next) => {
                 accessLevel: userAccessLevel.user
             }
         );
-
-        await user.save();
-
+        
         res.status(201).json({
             code: successes.routes.register,
             status: status.success,

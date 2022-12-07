@@ -106,6 +106,8 @@
 			"climb": "errors.routes.update.climb"
 		},
 		"delete": {
+			"place": "errors.routes.delete.place",
+			"climb": "errors.routes.delete.climb"
 		},
 		"details": {
 			"place": "errors.routes.get.details.place",

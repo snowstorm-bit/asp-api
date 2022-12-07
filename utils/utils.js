@@ -41,6 +41,7 @@ let updateErrorIfNecessary = (model, errorCode, validatorKey, cause) => {
         if (cause.match('[A-Z]')) {
             cause = toSnakeCase(cause);
         }
+        console.log(model, cause, validatorKey, errorCode);
         return errors[model][cause].is_null;
     } else if (validatorKey === 'not_unique') {
         return errors[model].unique_constraint;

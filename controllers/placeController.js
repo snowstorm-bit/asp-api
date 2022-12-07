@@ -89,8 +89,6 @@ exports.create = async (req, res, next) => {
             }
         );
 
-        await place.save();
-
         res.status(201).json({
             code: successes.routes.create.place,
             status: status.success,
