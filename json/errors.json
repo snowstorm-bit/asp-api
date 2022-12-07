@@ -118,6 +118,7 @@
 	"auth": {
 		"login_required": "errors.auth.login_required",
 		"session_expired": "errors.auth.session_expired",
-		"unauthorized": "errors.auth.unauthorized"
+		"unauthorized": "errors.auth.unauthorized",
+		"invalid": "errors.auth.invalid"
 	}
 }

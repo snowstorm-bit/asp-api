@@ -56,11 +56,13 @@ app.use((req, res, next) =>
     res.status(404).json({ message: 'Route introuvable !' }));
 
 // Manage error
-app.use((error, req, res, next) =>
+app.use((error, req, res, next) => {
+    console.log('has reached manage error');
     res.status(error.statusCode || 500).json({
         codes: error.codes,
         status: status.error
-    }));
+    });
+});
 
 app.listen(8080, async () => {
     console.log('Connection à la BD ouverte sur le port %s ', 8080);

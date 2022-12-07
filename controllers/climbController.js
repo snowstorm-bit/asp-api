@@ -1,11 +1,12 @@
 'use strict';
 const { QueryTypes } = require('sequelize');
-const { Climbs, Places, sequelize, UserRates } = require('../database');
+const { Climbs, Places, sequelize } = require('../database');
 const { throwError, manageError, round, paginateResponse } = require('../utils/utils');
 const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const Place = require('../classes/place');
+const UserRates = require('../classes/userRates');
 
 exports.getAll = async (req, res, next) => {
     try {
@@ -114,6 +115,7 @@ exports.getAll = async (req, res, next) => {
             result.styles = climbStyle;
         }
 
+        console.log('result', result);
         res.status(200).json({
             code: successes.routes.all.climbs,
             status: status.success,
@@ -129,6 +131,57 @@ exports.getAll = async (req, res, next) => {
 };
 
 exports.getOne = async (req, res, next) => {
+    try {
+        let result = await Climbs.findOne({
+            attributes: [
+                'id', 'title', 'description', 'style', 'difficultyLevel', 'images',
+                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
+                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
+            ],
+            include: [
+                {
+                    model: UserRates,
+                    attributes: ['climbId', 'rate'],
+                    required: true
+                },
+                {
+                    model: Place,
+                    attributes: ['title'],
+                    required: true
+                }
+            ],
+            where: {
+                title: req.params.title
+            },
+            group: ['UserRate.climb_id'],
+            raw: true
+        });
+
+        if (result === null) {
+            throwError(errors.climb.not_found, 'climb_details', 404, false);
+        }
+
+        res.status(200).json({
+            code: successes.routes.details.place,
+            status: status.success,
+            result: {
+                title: result.title,
+                description: result.description,
+                style: result.style,
+                image: result.images.split(';')[0],
+                difficultyLevel: result.difficultyLevel,
+                placeTitle: result.Place.title,
+                rate: round(Number(result.rate)),
+                votes: result.votes,
+                isCreator: req.user.status || req.user.id === result.userId
+            }
+        });
+    } catch (err) {
+        next(manageError(err, {
+            code: errors.routes.details.place,
+            cause: 'climb_details'
+        }));
+    }
 };
 
 exports.getForCreate = async (req, res, next) => {
@@ -240,8 +293,6 @@ exports.getForUpdate = async (req, res, next) => {
 
         let placeTitles = await Places.findAll({ attributes: ['title'] });
 
-        console.log('climb.placeTitle', climb.placeTitle);
-        console.log('climb.placeTitle', climb.placeTitle);
         res.status(200).json({
             code: successes.routes.update.climb,
             status: status.success,
@@ -330,7 +381,79 @@ exports.update = async (req, res, next) => {
             }
         });
     } catch (err) {
-        console.log(err);
+        next(manageError(err, {
+            code: errors.routes.update.climb,
+            cause: 'update_climb'
+        }));
+    }
+};
+
+exports.update = async (req, res, next) => {
+    try {
+        let place = await Places.findOne({
+            attributes: ['id'],
+            where: {
+                title: req.body.placeTitle
+            }
+        });
+
+        if (place === null) {
+            throwError(errors.climb.place_title.not_found, 'place_title', 404, false);
+        }
+
+        let result = await Climbs.findOne({
+            attributes: ['id', 'userId', 'images'],
+            where: {
+                title: req.params.title
+            }
+        });
+
+        if (result === null) {
+            throwError(errors.climb.not_found, 'update_climb', 404, false);
+        } else if (result.userId !== req.user.id) {
+            throwError(errors.auth.unauthorized, 'update_climb', 403, false);
+        }
+
+        // If the title of the climb has changed but the result is equals to the changed title,
+        // this means the title is already associated to an other place
+        let resultForUniqueConstraint = await Climbs.findOne({
+            attributes: ['title'],
+            where: {
+                placeId: place.id,
+                title: req.body.title
+            }
+        });
+
+        if (resultForUniqueConstraint !== null && req.params.title !== req.body.title) {
+            throwError(errors.climb.unique_constraint, 'title', 422, false);
+        }
+
+        let images = result.images;
+        images.push(...req.body.images);
+
+        if (req.body.difficultyLevel === '5.1') {
+            throwError(errors.climb.difficulty_level.range, 'difficulty_level', 422, false);
+        }
+
+        let climb = await result.set({
+            title: req.body.title,
+            description: req.body.description,
+            style: req.body.style,
+            difficultyLevel: Number(req.body.difficultyLevel),
+            images: images,
+            placeId: place.id
+        });
+
+        await climb.save();
+
+        res.status(200).json({
+            code: successes.routes.update.climb,
+            status: status.success,
+            result: {
+                title: climb.title
+            }
+        });
+    } catch (err) {
         next(manageError(err, {
             code: errors.routes.update.climb,
             cause: 'update_climb'

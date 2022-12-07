@@ -2,13 +2,17 @@
 
 const express = require('express');
 const router = express.Router();
-const { needsAuth, isAuth } = require('../middlewares/is-auth');
+const { isAuth, needsUserAuth } = require('../middlewares/is-auth');
 const placeController = require('../controllers/placeController');
+const { status } = require('../utils/enums');
 
 router.get('/details/:title', isAuth, placeController.getOne);
-router.post('/', needsAuth, placeController.create);
-router.get('/:title', needsAuth, placeController.getForUpdate);
-router.put('/:title', needsAuth, placeController.update);
+router.get('/', needsUserAuth, (req, res, next) =>
+    res.status(200).send({ status: status.success }));
+router.post('/', needsUserAuth, placeController.create);
+router.get('/:title', needsUserAuth, placeController.getForUpdate);
+router.put('/:title', needsUserAuth, placeController.update);
+// router.delete('/:title', needsAdminAuth, placeController.delete);
 
 // Export des routes pour utilisation dans app.js
 module.exports = router;

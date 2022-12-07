@@ -29,13 +29,13 @@ exports.register = async (req, res, next) => {
             status: status.success,
             result: {
                 username: user.username,
-                access_level: user.accessLevel
+                accessLevel: user.accessLevel
             },
             token: jwt.sign(
                 {
                     email: user.email,
                     id: user.id,
-                    access_level: user.accessLevel
+                    accessLevel: user.accessLevel
                 },
                 process.env.SECRET_JTW_KEY,
                 { expiresIn: '1h' }
@@ -71,13 +71,13 @@ exports.login = async (req, res, next) => {
             status: status.success,
             result: {
                 username: user.username,
-                access_level: user.accessLevel
+                accessLevel: user.accessLevel
             },
             token: jwt.sign(
                 {
                     id: user.id,
                     email: user.email,
-                    access_level: user.accessLevel
+                    accessLevel: user.accessLevel
                 },
                 process.env.SECRET_JTW_KEY,
                 { expiresIn: '1h' }
