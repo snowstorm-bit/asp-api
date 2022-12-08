@@ -7,17 +7,21 @@
 			"climb": "successes.routes.create.climb"
 		},
 		"update": {
+			"account_profile": "successes.routes.update.account_profile",
 			"place": "successes.routes.update.place",
 			"climb": "successes.routes.update.climb"
 		},
 		"delete": {
+			"place": "successes.routes.delete.place",
+			"climb": "successes.routes.delete.climb"
 		},
 		"details": {
 			"place": "successes.routes.get.details.place",
-			"climb": "successes.routes.get.details.climb"
+			"climb": "successes.routes.get.details.climb",
+			"account": "successes.routes.get.details.account"
 		},
 		"all": {
-			"climbs": "successes.route.get.all.climbs"
+			"climbs": "successes.routes.get.all.climbs"
 		}
 	}
 }

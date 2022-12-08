@@ -2,15 +2,16 @@
 
 const express = require('express');
 const router = express.Router();
-const { needsAuth, isAuth } = require('../middlewares/is-auth');
+const { isAuth, needsAdminAuth, needsUserAuth } = require('../middlewares/is-auth');
 const climbController = require('../controllers/climbController');
 
-router.get('/all', climbController.getAll2);
+router.get('/all', climbController.getAll);
 router.get('/details/:title', isAuth, climbController.getOne);
-router.get('/', needsAuth, climbController.getForCreate);
-router.post('/', needsAuth, climbController.create);
-router.get('/:title', needsAuth, climbController.getForUpdate);
-router.put('/:title', needsAuth, climbController.update);
+router.get('/', needsUserAuth, climbController.getForCreate);
+router.post('/', needsUserAuth, climbController.create);
+router.get('/:title', needsUserAuth, climbController.getForUpdate);
+router.put('/:title', needsUserAuth, climbController.update);
+router.delete('/:title', needsAdminAuth, climbController.delete);
 
 // Export des routes pour utilisation dans app.js
 module.exports = router;

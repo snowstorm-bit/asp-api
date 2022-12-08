@@ -102,14 +102,23 @@
 			"climb": "errors.routes.create.climb"
 		},
 		"update": {
+			"account_profile": "errors.routes.update.account_profile",
 			"place": "errors.routes.update.place",
 			"climb": "errors.routes.update.climb"
 		},
 		"delete": {
+			"place": "errors.routes.delete.place",
+			"climb": "errors.routes.delete.climb"
 		},
 		"details": {
 			"place": "errors.routes.get.details.place",
-			"climb": "errors.routes.get.details.climb"
+			"climb": "errors.routes.get.details.climb",
+			"account": {
+				"profile": "errors.routes.get.details.account.profile",
+				"created_places": "errors.routes.get.details.account.created_places",
+				"created_climbs": "errors.routes.get.details.account.created_climbs",
+				"voted_climbs": "errors.routes.get.details.account.voted_climbs"
+			}
 		},
 		"all": {
 			"climbs": "errors.route.get.all.climbs"
@@ -118,6 +127,7 @@
 	"auth": {
 		"login_required": "errors.auth.login_required",
 		"session_expired": "errors.auth.session_expired",
-		"unauthorized": "errors.auth.unauthorized"
+		"unauthorized": "errors.auth.unauthorized",
+		"invalid": "errors.auth.invalid"
 	}
 }

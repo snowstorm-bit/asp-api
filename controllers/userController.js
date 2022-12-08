@@ -9,6 +9,7 @@ const { status, userAccessLevel } = require('../utils/enums');
 const { Users } = require('../database');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
+
 dotenv.config();
 
 exports.register = async (req, res, next) => {
@@ -22,20 +23,18 @@ exports.register = async (req, res, next) => {
             }
         );
 
-        await user.save();
-
         res.status(201).json({
             code: successes.routes.register,
             status: status.success,
             result: {
                 username: user.username,
-                access_level: user.accessLevel
+                accessLevel: user.accessLevel
             },
             token: jwt.sign(
                 {
                     email: user.email,
                     id: user.id,
-                    access_level: user.accessLevel
+                    accessLevel: user.accessLevel
                 },
                 process.env.SECRET_JTW_KEY,
                 { expiresIn: '1h' }
@@ -71,13 +70,13 @@ exports.login = async (req, res, next) => {
             status: status.success,
             result: {
                 username: user.username,
-                access_level: user.accessLevel
+                accessLevel: user.accessLevel
             },
             token: jwt.sign(
                 {
                     id: user.id,
                     email: user.email,
-                    access_level: user.accessLevel
+                    accessLevel: user.accessLevel
                 },
                 process.env.SECRET_JTW_KEY,
                 { expiresIn: '1h' }
@@ -87,6 +86,56 @@ exports.login = async (req, res, next) => {
         next(manageError(err, {
             code: errors.routes.login,
             cause: 'login'
+        }));
+    }
+};
+
+exports.getProfile = async (req, res, next) => {
+    try {
+        let user = await Users.findOne({
+            attributes: ['username'],
+            where: {
+                id: req.user.id
+            }
+        });
+
+        res.status(200).json({
+            code: successes.routes.details.account,
+            status: status.success,
+            result: {
+                username: user.username
+            }
+        });
+    } catch (err) {
+        next(manageError(err, {
+            code: errors.routes.details.account.profile,
+            cause: 'profile'
+        }));
+    }
+};
+
+exports.updateProfile = async (req, res, next) => {
+    try {
+        let user = await Users.findOne({
+            attributes: ['id'],
+            where: {
+                id: req.user.id
+            }
+        });
+
+        await user.update({ username: req.body.username });
+
+        res.status(200).json({
+            code: successes.routes.update.account_profile,
+            status: status.success,
+            result: {
+                username: user.username
+            }
+        });
+    } catch (err) {
+        next(manageError(err, {
+            code: errors.routes.update.account_profile,
+            cause: 'profile'
         }));
     }
 };
