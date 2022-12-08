@@ -10,7 +10,7 @@ const path = require('path');
 
 const { status } = require('./utils/enums');
 const { uploadFiles } = require('./utils/utils');
-const { needsAuth } = require('./middlewares/is-auth');
+const { needsUserAuth } = require('./middlewares/is-auth');
 
 const app = express();
 
@@ -32,7 +32,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.post('/upload', needsAuth, (req, res, next) => {
+app.post('/upload', needsUserAuth, (req, res, next) => {
     try {
         console.log(req.body.file.filename);
         if (req.body.file !== undefined && req.body.file !== null) {
@@ -56,13 +56,11 @@ app.use((req, res, next) =>
     res.status(404).json({ message: 'Route introuvable !' }));
 
 // Manage error
-app.use((error, req, res, next) => {
-    console.log('has reached manage error');
+app.use((error, req, res, next) =>
     res.status(error.statusCode || 500).json({
         codes: error.codes,
         status: status.error
-    });
-});
+    }));
 
 app.listen(8080, async () => {
     console.log('Connection à la BD ouverte sur le port %s ', 8080);

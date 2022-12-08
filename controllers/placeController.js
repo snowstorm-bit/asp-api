@@ -1,13 +1,58 @@
 'use strict';
 
 const { Places, Climbs, sequelize } = require('../database');
-const { throwError, manageError, round } = require('../utils/utils');
+const { throwError, manageError, round, paginateResponse } = require('../utils/utils');
 const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const UserRates = require('../classes/userRates');
 const dotenv = require('dotenv');
 dotenv.config();
+
+exports.getCreated = async (req, res, next) => {
+    try {
+        let searchCriterias = {
+            offset: Number(req.query.offset) || 0,
+            limit: req.query.limit ? Number(req.query.limit) : 15
+        };
+
+        let createdPlaces = await Places.findAll({
+            attributes: ['title'],
+            where: {
+                userId: req.user.id
+            },
+            offset: searchCriterias.offset,
+            limit: searchCriterias.limit
+        });
+
+        let result = paginateResponse(createdPlaces, searchCriterias.offset, searchCriterias.limit);
+
+        if (result.hasMoreResult) {
+            let nextCreatedPlace = await Places.findOne({
+                attributes: ['id'],
+                where: {
+                    userId: req.user.id
+                },
+                offset: result.offset
+            });
+
+            if (nextCreatedPlace === null) {
+                result.hasMoreResult = false;
+            }
+        }
+
+        res.status(200).json({
+            code: successes.routes.details.account,
+            status: status.success,
+            result: result
+        });
+    } catch (err) {
+        next(manageError(err, {
+            code: errors.routes.details.account.created_places,
+            cause: 'created_places'
+        }));
+    }
+};
 
 exports.getOne = async (req, res, next) => {
     try {

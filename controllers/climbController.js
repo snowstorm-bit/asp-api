@@ -130,6 +130,114 @@ exports.getAll = async (req, res, next) => {
     }
 };
 
+exports.getCreated = async (req, res, next) => {
+    try {
+        let searchCriterias = {
+            offset: Number(req.query.offset) || 0,
+            limit: req.query.limit ? Number(req.query.limit) : 15
+        };
+
+        let createdClimbs = await Climbs.findAll({
+            attributes: ['title'],
+            where: {
+                userId: req.user.id
+            },
+            offset: searchCriterias.offset,
+            limit: searchCriterias.limit
+        });
+
+        let result = paginateResponse(createdClimbs, searchCriterias.offset, searchCriterias.limit);
+
+        if (result.hasMoreResult) {
+            let nextCreatedClimb = await Climbs.findOne({
+                attributes: ['id'],
+                where: {
+                    userId: req.user.id
+                },
+                offset: result.offset
+            });
+
+            if (nextCreatedClimb === null) {
+                result.hasMoreResult = false;
+            }
+        }
+
+        res.status(200).json({
+            code: successes.routes.details.account,
+            status: status.success,
+            result: result
+        });
+    } catch (err) {
+        next(manageError(err, {
+            code: errors.routes.details.account.created_climbs,
+            cause: 'created_climbs'
+        }));
+    }
+};
+
+exports.getVoted = async (req, res, next) => {
+    try {
+        let searchCriterias = {
+            offset: Number(req.query.offset) || 0,
+            limit: req.query.limit ? Number(req.query.limit) : 15
+        };
+
+        let results = await Climbs.findAll({
+            attributes: [
+                'id', 'title',
+                [sequelize.col('UserRate.rate'), 'rate']
+            ],
+            include: {
+                model: UserRates,
+                attributes: ['rate'],
+                where: {
+                    userId: req.user.id
+                }
+            },
+            offset: searchCriterias.offset,
+            limit: searchCriterias.limit
+        });
+
+        let votedClimbs = [];
+
+        results.forEach(result => votedClimbs.push({
+            title: result.title,
+            rate: result.rate
+        }));
+
+        let result = paginateResponse(votedClimbs, searchCriterias.offset, searchCriterias.limit);
+
+        if (result.hasMoreResult) {
+            let nextVotedClimb = await Climbs.findOne({
+                attributes: ['id'],
+                include: {
+                    model: UserRates,
+                    attributes: [],
+                    where: {
+                        userId: req.user.id
+                    }
+                },
+                offset: result.offset
+            });
+
+            if (nextVotedClimb === null) {
+                result.hasMoreResult = false;
+            }
+        }
+
+        res.status(200).json({
+            code: successes.routes.details.account,
+            status: status.success,
+            result: result
+        });
+    } catch (err) {
+        next(manageError(err, {
+            code: errors.routes.details.account.voted_climbs,
+            cause: 'voted_climbs'
+        }));
+    }
+};
+
 exports.getOne = async (req, res, next) => {
     try {
         let result = await Climbs.findOne({
@@ -162,7 +270,7 @@ exports.getOne = async (req, res, next) => {
         }
 
         res.status(200).json({
-            code: successes.routes.details.place,
+            code: successes.routes.details.climb,
             status: status.success,
             result: {
                 title: result.title,
