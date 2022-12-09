@@ -70,7 +70,7 @@ exports.getOne = async (req, res, next) => {
 
         result = result.toJSON();
 
-        let climbs = (await Climbs.findAll({
+        let results = await Climbs.findAll({
             attributes: [
                 'title', 'style', 'difficultyLevel',
                 [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
@@ -86,12 +86,17 @@ exports.getOne = async (req, res, next) => {
             },
             group: ['UserRate.climb_id'],
             order: [['title', 'ASC']]
-        })).toJSON();
+        });
+
+        let climbs = [];
+        results.forEach(climb => climbs.push(climb.toJSON()));
 
         delete result.id;
+
         result.climbs = climbs;
         result.styles = climbStyle;
         result.isCreator = validateAuthenticatedUser(req.user, result.userId);
+        delete result.userId;
 
         res.status(200).json({
             code: successes.routes.details.place,

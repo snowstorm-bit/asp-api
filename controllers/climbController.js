@@ -47,12 +47,14 @@ exports.getAll = async (req, res, next) => {
             minDecimal = Number(minDecimal);
             maxDecimal = Number(maxDecimal);
 
-            // set step and min decimal if 10
+            // set step and min decimal if 10 or superior
             // ex : bad -> 5.10 + 0.1 => 5.2
             //      good -> 5.10 + 0.01 => 5.11
             let step = 0.1;
             if (minDecimal === 1 || minDecimal === 10) {
                 minDecimal = 10;
+            }
+            if (minDecimal >= 10) {
                 step = 0.01;
             }
 
@@ -239,7 +241,11 @@ exports.getRated = async (req, res, next) => {
         findAllOptions.attributes = ['title', [sequelize.col('UserRate.rate'), 'rate']];
         findAllOptions.offset = searchCriterias.offset;
         findAllOptions.limit = searchCriterias.limit;
-        let ratedClimbs = (await Climbs.findAll(findAllOptions)).toJSON();
+
+        let results = await Climbs.findAll(findAllOptions);
+        
+        let ratedClimbs = [];
+        results.forEach(result => ratedClimbs.push(result.toJSON()));
 
         let result = paginateResponse(ratedClimbs, searchCriterias.offset, searchCriterias.limit);
 
@@ -284,7 +290,7 @@ exports.getOne = async (req, res, next) => {
 
         let result = (await Climbs.findOne({
             attributes: [
-                'title', 'description', 'style', 'difficultyLevel', 'images',
+                'title', 'description', 'style', 'difficultyLevel', 'images', 'userId',
                 [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
                 [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
                 [sequelize.col('Place.title'), 'placeTitle']
@@ -308,6 +314,7 @@ exports.getOne = async (req, res, next) => {
         })).toJSON();
 
         result.isCreator = validateAuthenticatedUser(req.user, result.userId);
+        delete result.userId;
 
         res.status(200).json({
             code: successes.routes.details.climb,

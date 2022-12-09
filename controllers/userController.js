@@ -83,6 +83,7 @@ exports.login = async (req, res, next) => {
             )
         });
     } catch (err) {
+        console.log(err);
         next(manageError(err, {
             code: errors.routes.login,
             cause: 'login'
