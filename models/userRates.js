@@ -16,6 +16,7 @@ module.exports = sequelize => {
         {
             userId: {
                 type: DataTypes.INTEGER,
+                primaryKey: true,
                 allowNull: false,
                 references: {
                     model: User,
@@ -25,6 +26,7 @@ module.exports = sequelize => {
             },
             climbId: {
                 type: DataTypes.INTEGER,
+                primaryKey: true,
                 allowNull: false,
                 references: {
                     model: Climb,
