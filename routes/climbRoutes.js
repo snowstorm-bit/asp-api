@@ -12,6 +12,8 @@ router.post('/', needsUserAuth, climbController.create);
 router.get('/:title', needsUserAuth, climbController.getForUpdate);
 router.put('/:title', needsUserAuth, climbController.update);
 router.delete('/:title', needsAdminAuth, climbController.delete);
+router.post('/rate/:title', needsUserAuth, climbController.rateOne);
+router.delete('/rate/:title', needsUserAuth, climbController.deleteOneRate);
 
 // Export des routes pour utilisation dans app.js
 module.exports = router;

@@ -62,7 +62,7 @@ module.exports.manageError = (err, globalError) => {
         err.errors.forEach(errToManage => {
             // console.log(errToManage);
             let cause = errToManage.path;
-            let model = errToManage.instance.constructor.name.toString().toLowerCase();
+            let model = toSnakeCase(errToManage.instance.constructor.name.toString());
 
             // When validation has many error messages in the error message
             if (errToManage.message.includes(';')) {

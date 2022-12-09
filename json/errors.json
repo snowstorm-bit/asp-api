@@ -88,6 +88,7 @@
 		}
 	},
 	"user_rates": {
+		"not_found": "errors.fields.user_rates.not_found",
 		"rate": {
 			"not_int": "errors.fields.user_rates.rate.not_int",
 			"empty_or_white_spaces": "errors.fields.user_rates.rate.empty_or_white_spaces",
@@ -97,6 +98,9 @@
 	"routes": {
 		"register": "errors.routes.register",
 		"login": "errors.routes.login",
+		"rate": {
+			"climb": "errors.routes.rate.climb"
+		},
 		"create": {
 			"place": "errors.routes.create.place",
 			"climb": "errors.routes.create.climb"
@@ -117,7 +121,7 @@
 				"profile": "errors.routes.get.details.account.profile",
 				"created_places": "errors.routes.get.details.account.created_places",
 				"created_climbs": "errors.routes.get.details.account.created_climbs",
-				"voted_climbs": "errors.routes.get.details.account.voted_climbs"
+				"rated_climbs": "errors.routes.get.details.account.rated_climbs"
 			}
 		},
 		"all": {

@@ -28,7 +28,7 @@ exports.getCreated = async (req, res, next) => {
         let result = paginateResponse(createdPlaces, searchCriterias.offset, searchCriterias.limit);
 
         if (result.hasMoreResult) {
-            let nextCreatedPlace = await Places.findOne({
+            let nextCreatedPlace = await Places.count({
                 attributes: ['id'],
                 where: {
                     userId: req.user.id
@@ -82,6 +82,7 @@ exports.getOne = async (req, res, next) => {
                 placeId: result.id
             },
             group: ['UserRate.climb_id'],
+            order: ['title', 'ASC'],
             raw: true
         });
 

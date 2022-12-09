@@ -53,7 +53,8 @@ db.ClimbBelongsToUserAssociation = Climb.belongsTo(User, {
 // Defining user rates relation
 User.hasMany(UserRates, {
     foreignKey: {
-        name: 'user_id',
+        name: 'userId',
+        field: 'user_id',
         allowNull: false
     },
     onDelete: 'CASCADE',
@@ -66,13 +67,15 @@ UserRates.belongsTo(User, {
 
 Climb.hasOne(UserRates, {
     foreignKey: {
-        name: 'climb_id',
+        name: 'climbId',
+        field: 'climb_id',
         allowNull: false
     }
 });
 
 UserRates.belongsTo(Climb, {
-    foreignKey: 'climb_id'
+    foreignKey: 'climb_id',
+    as: 'user_rates_climb'
 });
 
 db.sequelize = sequelize;

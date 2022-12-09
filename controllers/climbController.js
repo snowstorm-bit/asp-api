@@ -1,12 +1,13 @@
 'use strict';
 const { QueryTypes } = require('sequelize');
-const { Climbs, Places, sequelize } = require('../database');
+const { Climbs, Places, UserRates, sequelize } = require('../database');
 const { throwError, manageError, round, paginateResponse } = require('../utils/utils');
 const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const Place = require('../classes/place');
-const UserRates = require('../classes/userRates');
+const UserRatesModel = require('../classes/userRates');
+const Climb = require('../classes/climb');
 
 exports.getAll = async (req, res, next) => {
     try {
@@ -175,7 +176,7 @@ exports.getCreated = async (req, res, next) => {
     }
 };
 
-exports.getVoted = async (req, res, next) => {
+exports.getRated = async (req, res, next) => {
     try {
         let searchCriterias = {
             offset: Number(req.query.offset) || 0,
@@ -188,7 +189,7 @@ exports.getVoted = async (req, res, next) => {
                 [sequelize.col('UserRate.rate'), 'rate']
             ],
             include: {
-                model: UserRates,
+                model: UserRatesModel,
                 attributes: ['rate'],
                 where: {
                     userId: req.user.id
@@ -198,20 +199,20 @@ exports.getVoted = async (req, res, next) => {
             limit: searchCriterias.limit
         });
 
-        let votedClimbs = [];
+        let ratedClimbs = [];
 
-        results.forEach(result => votedClimbs.push({
+        results.forEach(result => ratedClimbs.push({
             title: result.title,
             rate: result.rate
         }));
 
-        let result = paginateResponse(votedClimbs, searchCriterias.offset, searchCriterias.limit);
+        let result = paginateResponse(ratedClimbs, searchCriterias.offset, searchCriterias.limit);
 
         if (result.hasMoreResult) {
-            let nextVotedClimb = await Climbs.findOne({
+            let nextRatedClimb = await Climbs.findOne({
                 attributes: ['id'],
                 include: {
-                    model: UserRates,
+                    model: UserRatesModel,
                     attributes: [],
                     where: {
                         userId: req.user.id
@@ -220,7 +221,7 @@ exports.getVoted = async (req, res, next) => {
                 offset: result.offset
             });
 
-            if (nextVotedClimb === null) {
+            if (nextRatedClimb === null) {
                 result.hasMoreResult = false;
             }
         }
@@ -232,8 +233,8 @@ exports.getVoted = async (req, res, next) => {
         });
     } catch (err) {
         next(manageError(err, {
-            code: errors.routes.details.account.voted_climbs,
-            cause: 'voted_climbs'
+            code: errors.routes.details.account.rated_climbs,
+            cause: 'rated_climbs'
         }));
     }
 };
@@ -248,7 +249,7 @@ exports.getOne = async (req, res, next) => {
             ],
             include: [
                 {
-                    model: UserRates,
+                    model: UserRatesModel,
                     attributes: ['climbId', 'rate'],
                     required: true
                 },
@@ -522,6 +523,143 @@ exports.delete = async (req, res, next) => {
         next(manageError(err, {
             code: errors.routes.delete.climb,
             cause: 'delete_climb'
+        }));
+    }
+};
+
+exports.rateOne = async (req, res, next) => {
+    try {
+        let climb = await Climbs.findOne({
+            attributes: ['id'],
+            where: {
+                title: req.params.title
+            }
+        });
+
+        if (climb === null) {
+            throwError(errors.climb.not_found, 'climb_title', 404, false);
+        }
+
+        let [_, created] = await UserRates.findOrCreate({
+            attributes: ['climbId', 'userId'],
+            where: {
+                climbId: climb.id,
+                userId: req.user.id
+            },
+            defaults: {
+                rate: req.body.rate
+            }
+        });
+
+        if (!created) {
+            // trying to update returned record will throw and error since update seems to ignore the 
+            // model's field instructions for properties that need underscore 
+            await UserRatesModel.update({ rate: req.body.rate }, {
+                where: {
+                    climbId: climb.id,
+                    userId: req.user.id
+                }
+            });
+        }
+
+        climb = await Climbs.findOne({
+            attributes: [
+                'id',
+                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
+                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
+            ],
+            include: [
+                {
+                    model: UserRatesModel,
+                    attributes: ['climbId', 'rate'],
+                    required: true,
+                    as: 'ur'
+                }
+            ],
+            where: {
+                title: req.params.title
+            },
+            group: ['UserRate.climb_id'],
+            raw: true
+        });
+
+        res.status(created ? 201 : 200).json({
+            code: successes.routes[created ? 'create' : 'update'].rate.climb,
+            status: status.success,
+            result: {
+                rate: round(Number(climb.rate)),
+                votes: climb.votes
+            }
+        });
+    } catch (err) {
+        console.log(err);
+        next(manageError(err, {
+            code: errors.routes.rate.climb,
+            cause: 'rate_climb'
+        }));
+    }
+};
+
+exports.deleteOneRate = async (req, res, next) => {
+    try {
+        let climb = await Climbs.findOne({
+            attributes: ['id'],
+            where: {
+                title: req.params.title
+            }
+        });
+
+        if (climb === null) {
+            throwError(errors.climb.not_found, 'climb_title', 404, false);
+        }
+
+        let result = await UserRates.findOne({
+            attributes: ['climbId', 'userId'],
+            where: {
+                climbId: climb.id,
+                userId: req.user.id
+            }
+        });
+
+        if (result === null) {
+            throwError(errors.user_rates.not_found, 'user_rate', 404, false);
+        }
+
+        await result.destroy();
+
+        climb = await Climbs.findOne({
+            attributes: [
+                'id',
+                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
+                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
+            ],
+            include: [
+                {
+                    model: UserRatesModel,
+                    attributes: ['climbId', 'rate'],
+                    required: true
+                }
+            ],
+            where: {
+                title: req.params.title
+            },
+            group: ['UserRate.climb_id'],
+            raw: true
+        });
+
+        res.status(200).json({
+            code: successes.routes.delete.rate.climb,
+            status: status.success,
+            result: {
+                rate: round(Number(climb.rate)),
+                votes: climb.votes
+            }
+        });
+    } catch (err) {
+        console.log(err);
+        next(manageError(err, {
+            code: errors.routes.rate.climb,
+            cause: 'rate_climb'
         }));
     }
 };

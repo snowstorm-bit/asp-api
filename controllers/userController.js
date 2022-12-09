@@ -123,6 +123,7 @@ exports.updateProfile = async (req, res, next) => {
             }
         });
 
+        console.log(typeof user);
         await user.update({ username: req.body.username });
 
         res.status(200).json({
