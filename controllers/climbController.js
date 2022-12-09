@@ -124,7 +124,11 @@ exports.getAll = async (req, res, next) => {
         let results = await Climbs.findAll(findAllOptions);
 
         let climbs = [];
-        results.forEach(result => climbs.push(result.toJSON()));
+        results.forEach(result => {
+            let climb = result.toJSON();
+            climb.image = climb.images[0];
+            climbs.push(climb);
+        });
 
         let result = paginateResponse(climbs, searchCriterias.offset, searchCriterias.limit);
 
@@ -193,7 +197,7 @@ exports.getCreated = async (req, res, next) => {
         if (result.hasMoreResult) {
             let findOneOptions = findOptions;
             findOneOptions.offset = result.offset;
-            
+
             let nextCreatedClimb = await Climbs.findOne(findOneOptions);
 
             if (nextCreatedClimb === null) {

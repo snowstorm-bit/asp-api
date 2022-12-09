@@ -72,7 +72,7 @@ exports.getOne = async (req, res, next) => {
 
         let climbs = (await Climbs.findAll({
             attributes: [
-                'title', 'style', 'difficultyLevel', 'images',
+                'title', 'style', 'difficultyLevel',
                 [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
                 [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate']
             ],
