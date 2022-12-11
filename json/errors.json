@@ -99,17 +99,14 @@
 	"routes": {
 		"register": "errors.routes.register",
 		"login": "errors.routes.login",
-		"rate": {
-			"climb": "errors.routes.rate.climb"
-		},
 		"create": {
 			"place": "errors.routes.create.place",
 			"climb": "errors.routes.create.climb"
 		},
 		"update": {
-			"account_profile": "errors.routes.update.account_profile",
 			"place": "errors.routes.update.place",
-			"climb": "errors.routes.update.climb"
+			"climb": "errors.routes.update.climb",
+			"account_profile": "errors.routes.update.account_profile"
 		},
 		"delete": {
 			"place": "errors.routes.delete.place",
@@ -124,6 +121,11 @@
 				"created_climbs": "errors.routes.get.details.account.created_climbs",
 				"rated_climbs": "errors.routes.get.details.account.rated_climbs"
 			}
+		},
+		"rate": {
+			"climb": "errors.routes.rate.climb",
+			"not_found": "errors.routes.rate.not_found",
+			"climb_not_found": "errors.routes.rate.climb_not_found"
 		},
 		"all": {
 			"climbs": "errors.route.get.all.climbs"

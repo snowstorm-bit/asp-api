@@ -31,7 +31,6 @@ exports.getAll = async (req, res, next) => {
         if (req.query.rate !== undefined) {
             having.rate = { [Op.between]: req.query.rate };
         }
-
         if (req.query.place !== undefined) {
             where['$Place.title$'] = req.query.place;
         }
@@ -243,7 +242,7 @@ exports.getRated = async (req, res, next) => {
         findAllOptions.limit = searchCriterias.limit;
 
         let results = await Climbs.findAll(findAllOptions);
-        
+
         let ratedClimbs = [];
         results.forEach(result => ratedClimbs.push(result.toJSON()));
 
@@ -313,6 +312,18 @@ exports.getOne = async (req, res, next) => {
             group: ['UserRate.climb_id']
         })).toJSON();
 
+        if (req.user.id && req.user.accessLevel === 1) {
+            let userRate = (await UserRates.findOne({
+                attributes: ['rate'],
+                where: {
+                    climbId: climb.id,
+                    userId: req.user.id
+                }
+            })).toJSON();
+
+            result.userRate = userRate.rate || 0;
+        }
+
         result.isCreator = validateAuthenticatedUser(req.user, result.userId);
         delete result.userId;
 
@@ -324,7 +335,7 @@ exports.getOne = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         next(manageError(err, {
-            code: errors.routes.details.place,
+            code: errors.routes.details.climb,
             cause: 'climb_details'
         }));
     }
@@ -419,7 +430,7 @@ exports.getForUpdate = async (req, res, next) => {
         if (foundResult === null) {
             throwError(errors.climb.not_found, 'update_climb', 404, false);
         } else if (foundResult.userId !== req.user.id) {
-            throwError(errors.auth.unauthorized, 'update_climb', 403, false);
+            throwError(errors.auth.unauthorized, 'authentication', 403, false);
         }
 
         let result = (await Climbs.findOne({
@@ -476,7 +487,7 @@ exports.update = async (req, res, next) => {
         if (result === null) {
             throwError(errors.climb.not_found, 'update_climb', 404, false);
         } else if (result.userId !== req.user.id) {
-            throwError(errors.auth.unauthorized, 'update_climb', 403, false);
+            throwError(errors.auth.unauthorized, 'authentication', 403, false);
         }
 
         // If the title of the climb has changed but the result is equals to the changed title,
@@ -572,7 +583,7 @@ exports.rateOne = async (req, res, next) => {
         });
 
         if (climb === null) {
-            throwError(errors.climb.not_found, 'title', 404, false);
+            throwError(errors.routes.rate.climb_not_found, 'rate_climb', 404, false);
         }
 
         let [_, created] = await UserRates.upsert({
@@ -599,13 +610,13 @@ exports.rateOne = async (req, res, next) => {
             group: ['UserRate.climb_id']
         })).toJSON();
 
+        delete climb.id;
+        climb.userRate = req.body.rate;
+
         res.status(created ? 201 : 200).json({
             code: successes.routes[created ? 'create' : 'update'].rate.climb,
             status: status.success,
-            result: {
-                rate: climb.rate,
-                votes: climb.votes
-            }
+            result: climb
         });
     } catch (err) {
         console.log(err);
@@ -626,7 +637,7 @@ exports.deleteOneRate = async (req, res, next) => {
         });
 
         if (climb === null) {
-            throwError(errors.climb.not_found, 'title', 404, false);
+            throwError(errors.routes.rate.climb_not_found, 'rate_climb', 404, false);
         }
 
         let result = await UserRates.findOne({
@@ -638,7 +649,7 @@ exports.deleteOneRate = async (req, res, next) => {
         });
 
         if (result === null) {
-            throwError(errors.user_rates.not_found, 'userRate', 404, false);
+            throwError(errors.routes.rate.not_found, 'rate_climb', 404, false);
         }
 
         await result.destroy();
@@ -661,13 +672,12 @@ exports.deleteOneRate = async (req, res, next) => {
             group: ['UserRate.climb_id']
         })).toJSON();
 
+        climb.userRate = 0;
+
         res.status(200).json({
             code: successes.routes.delete.rate.climb,
             status: status.success,
-            result: {
-                rate: climb.rate,
-                votes: climb.votes
-            }
+            result: climb
         });
     } catch (err) {
         console.log(err);

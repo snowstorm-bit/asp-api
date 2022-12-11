@@ -36,7 +36,7 @@ module.exports.isAuth = (req, res, next) => {
                 if (decodedToken) {
                     req.user = decodedToken;
                 } else {
-                    req.user = { authInvalid: { status: 401, code: errors.auth.invalid } };
+                    req.user = { authInvalid: { status: 401, code: errors.auth.login_required } };
                 }
             } catch (err) {
                 req.user = {

@@ -135,7 +135,7 @@ exports.create = async (req, res, next) => {
     } catch (err) {
         next(manageError(err, {
             code: errors.routes.create.place,
-            cause: 'place_create'
+            cause: 'create_place'
         }));
     }
 };
@@ -152,7 +152,7 @@ exports.getForUpdate = async (req, res, next) => {
         if (result === null) {
             throwError(errors.place.not_found, 'update_place', 404, false);
         } else if (result.userId !== req.user.id) {
-            throwError(errors.auth.unauthorized, 'update_place', 403, false);
+            throwError(errors.auth.unauthorized, 'authentication', 403, false);
         }
 
         let place = (await Places.findOne({
@@ -187,7 +187,7 @@ exports.update = async (req, res, next) => {
         if (result === null) {
             throwError(errors.place.not_found, 'update_place', 404, false);
         } else if (result.userId !== req.user.id) {
-            throwError(errors.auth.unauthorized, 'update_place', 403, false);
+            throwError(errors.auth.unauthorized, 'authentication', 403, false);
         }
 
         await result.update({
