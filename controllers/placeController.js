@@ -1,7 +1,7 @@
 'use strict';
 
 const { Places, Climbs, sequelize } = require('../database');
-const { throwError, manageError, round, paginateResponse } = require('../utils/utils');
+const { throwError, manageError, round, paginateResponse, validateAuthenticatedUser } = require('../utils/utils');
 const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
@@ -16,25 +16,26 @@ exports.getCreated = async (req, res, next) => {
             limit: req.query.limit ? Number(req.query.limit) : 15
         };
 
-        let createdPlaces = await Places.findAll({
+        let findOptions = {
             attributes: ['title'],
             where: {
                 userId: req.user.id
-            },
-            offset: searchCriterias.offset,
-            limit: searchCriterias.limit
-        });
+            }
+        };
+
+        let findAllOptions = findOptions;
+        findAllOptions.offset = searchCriterias.offset;
+        findAllOptions.limit = searchCriterias.limit;
+
+        let createdPlaces = await Places.findAll(findAllOptions);
 
         let result = paginateResponse(createdPlaces, searchCriterias.offset, searchCriterias.limit);
 
         if (result.hasMoreResult) {
-            let nextCreatedPlace = await Places.findOne({
-                attributes: ['id'],
-                where: {
-                    userId: req.user.id
-                },
-                offset: result.offset
-            });
+            let findOneOptions = findOptions;
+            findOneOptions.offset = result.offset;
+
+            let nextCreatedPlace = await Places.findOne(findOneOptions);
 
             if (nextCreatedPlace === null) {
                 result.hasMoreResult = false;
@@ -67,52 +68,43 @@ exports.getOne = async (req, res, next) => {
             throwError(errors.place.not_found, 'place_details', 404, false);
         }
 
+        result = result.toJSON();
+
         let results = await Climbs.findAll({
             attributes: [
-                'id', 'title', 'style', 'difficultyLevel', 'images',
+                'title', 'style', 'difficultyLevel',
                 [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
                 [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate']
             ],
             include: {
                 model: UserRates,
-                attributes: ['climbId', 'rate'],
+                attributes: [],
                 required: true
             },
             where: {
                 placeId: result.id
             },
             group: ['UserRate.climb_id'],
-            raw: true
+            order: [['title', 'ASC']]
         });
 
         let climbs = [];
+        results.forEach(climb => climbs.push(climb.toJSON()));
 
-        results.forEach(result =>
-            climbs.push({
-                title: result.title,
-                style: result.style,
-                image: result.images.split(';')[0],
-                description: result.description,
-                difficultyLevel: result.difficultyLevel,
-                rate: round(Number(result.rate)),
-                votes: result.votes
-            }));
+        delete result.id;
+
+        result.climbs = climbs;
+        result.styles = climbStyle;
+        result.isCreator = validateAuthenticatedUser(req.user, result.userId);
+        delete result.userId;
 
         res.status(200).json({
             code: successes.routes.details.place,
             status: status.success,
-            result: {
-                title: result.title,
-                description: result.description,
-                steps: result.steps,
-                latitude: result.latitude,
-                longitude: result.longitude,
-                styles: climbStyle,
-                climbs: climbs,
-                isCreator: req.user.status || req.user.id === result.userId
-            }
+            result: result
         });
     } catch (err) {
+        console.log(err);
         next(manageError(err, {
             code: errors.routes.details.place,
             cause: 'place_details'
@@ -120,10 +112,9 @@ exports.getOne = async (req, res, next) => {
     }
 };
 
-
 exports.create = async (req, res, next) => {
     try {
-        let place = await Places.create(
+        await Places.create(
             {
                 title: req.body.title,
                 description: req.body.description,
@@ -138,13 +129,13 @@ exports.create = async (req, res, next) => {
             code: successes.routes.create.place,
             status: status.success,
             result: {
-                title: place.title
+                title: req.body.title
             }
         });
     } catch (err) {
         next(manageError(err, {
             code: errors.routes.create.place,
-            cause: 'place_create'
+            cause: 'create_place'
         }));
     }
 };
@@ -161,26 +152,20 @@ exports.getForUpdate = async (req, res, next) => {
         if (result === null) {
             throwError(errors.place.not_found, 'update_place', 404, false);
         } else if (result.userId !== req.user.id) {
-            throwError(errors.auth.unauthorized, 'update_place', 403, false);
+            throwError(errors.auth.unauthorized, 'authentication', 403, false);
         }
 
-        let place = await Places.findOne({
+        let place = (await Places.findOne({
             attributes: ['title', 'description', 'steps', 'latitude', 'longitude'],
             where: {
                 title: req.params.title
             }
-        });
+        })).toJSON();
 
         res.status(200).json({
             code: successes.routes.update.place,
             status: status.success,
-            result: {
-                title: place.title,
-                description: place.description,
-                steps: place.steps,
-                latitude: place.latitude,
-                longitude: place.longitude
-            }
+            result: place
         });
     } catch (err) {
         next(manageError(err, {
@@ -202,10 +187,10 @@ exports.update = async (req, res, next) => {
         if (result === null) {
             throwError(errors.place.not_found, 'update_place', 404, false);
         } else if (result.userId !== req.user.id) {
-            throwError(errors.auth.unauthorized, 'update_place', 403, false);
+            throwError(errors.auth.unauthorized, 'authentication', 403, false);
         }
 
-        let place = await result.set({
+        await result.update({
             title: req.body.title,
             description: req.body.description,
             steps: req.body.steps,
@@ -213,19 +198,48 @@ exports.update = async (req, res, next) => {
             longitude: req.body.longitude
         });
 
-        await place.save();
-
         res.status(200).json({
             code: successes.routes.update.place,
             status: status.success,
             result: {
-                title: place.title
+                title: req.body.title
             }
         });
     } catch (err) {
         next(manageError(err, {
             code: errors.routes.update.place,
             cause: 'update_place'
+        }));
+    }
+};
+
+exports.delete = async (req, res, next) => {
+    try {
+        let place = await Places.findOne({
+            attributes: ['id', 'title'],
+            where: {
+                title: req.params.title
+            }
+        });
+
+        if (place === null) {
+            throwError(errors.place.not_found, 'delete_place', 404, false);
+        }
+
+        await place.destroy();
+
+        res.status(200).json({
+            code: successes.routes.delete.place,
+            status: status.success,
+            result: {
+                title: place.title
+            }
+        });
+    } catch (err) {
+        console.log(err);
+        next(manageError(err, {
+            code: errors.routes.delete.place,
+            cause: 'delete_place'
         }));
     }
 };

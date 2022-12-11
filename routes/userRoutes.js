@@ -14,6 +14,6 @@ router.get('/account/profile', needsAuth, userController.getProfile);
 router.put('/account/profile', needsAuth, userController.updateProfile);
 router.get('/account/places', needsAuth, placeController.getCreated);
 router.get('/account/climbs', needsAuth, climbController.getCreated);
-router.get('/account/votes/climbs', needsAuth, climbController.getVoted);
+router.get('/account/rates/climbs', needsAuth, climbController.getRated);
 
 module.exports = router;

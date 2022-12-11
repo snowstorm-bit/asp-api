@@ -4,16 +4,25 @@
 		"login": "successes.routes.login",
 		"create": {
 			"place": "successes.routes.create.place",
-			"climb": "successes.routes.create.climb"
+			"climb": "successes.routes.create.climb",
+			"rate": {
+				"climb": "successes.routes.create.rate.climb"
+			}
 		},
 		"update": {
 			"account_profile": "successes.routes.update.account_profile",
 			"place": "successes.routes.update.place",
-			"climb": "successes.routes.update.climb"
+			"climb": "successes.routes.update.climb",
+			"rate": {
+				"climb": "successes.routes.update.rate.climb"
+			}
 		},
 		"delete": {
 			"place": "successes.routes.delete.place",
-			"climb": "successes.routes.delete.climb"
+			"climb": "successes.routes.delete.climb",
+			"rate": {
+				"climb": "successes.routes.delete.rate.climb"
+			}
 		},
 		"details": {
 			"place": "successes.routes.get.details.place",

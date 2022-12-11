@@ -16,21 +16,21 @@ module.exports = sequelize => {
         {
             userId: {
                 type: DataTypes.INTEGER,
+                primaryKey: true,
                 allowNull: false,
                 references: {
                     model: User,
-                    key: 'id',
-                    as: 'user_id'
+                    key: 'id'
                 },
                 field: 'user_id'
             },
             climbId: {
                 type: DataTypes.INTEGER,
+                primaryKey: true,
                 allowNull: false,
                 references: {
                     model: Climb,
-                    key: 'id',
-                    as: 'climb_id'
+                    key: 'id'
                 },
                 field: 'climb_id'
             },

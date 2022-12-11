@@ -62,10 +62,5 @@ app.use((error, req, res, next) =>
         status: status.error
     }));
 
-app.listen(8080, async () => {
-    console.log('Connection à la BD ouverte sur le port %s ', 8080);
-
-    let alter = false;
-    // let alter = true;
-    await database.sequelize.sync({ alter: alter });
-});
+app.listen(8080, () =>
+    console.log('App started. Listening on port 8080'));

@@ -7,27 +7,6 @@ const errors = require('../json/errors.json');
 const { userAccessLevel } = require('../utils/enums');
 dotenv.config();
 
-/** À utiliser lorsque nous avons uniquement besoin de savoir si l'utilisateur est connecté. */
-module.exports.isAuth = (req, res, next) => {
-    const authHeader = req.get('Authorization');
-    if (authHeader) {
-        const token = authHeader.split(' ')[1];
-        if (token) {
-            try {
-                let decodedToken = jwt.verify(token, process.env.SECRET_JTW_KEY);
-                if (decodedToken) {
-                    req.user = decodedToken;
-                } else {
-                    req.user = { status: 401 };
-                }
-            } catch {
-                req.user = { status: 401 };
-            }
-        }
-    }
-    next();
-};
-
 function decodeToken(authHeader) {
     if (!authHeader) {
         throwError(errors.auth.login_required, 'authentication', 401, false);
@@ -45,6 +24,35 @@ function decodeToken(authHeader) {
     }
     return decodedToken;
 }
+
+/** À utiliser lorsque nous avons uniquement besoin de savoir si l'utilisateur est connecté. */
+module.exports.isAuth = (req, res, next) => {
+    const authHeader = req.get('Authorization');
+    if (authHeader) {
+        const token = authHeader.split(' ')[1];
+        if (token) {
+            try {
+                let decodedToken = jwt.verify(token, process.env.SECRET_JTW_KEY);
+                if (decodedToken) {
+                    req.user = decodedToken;
+                } else {
+                    req.user = { authInvalid: { status: 401, code: errors.auth.login_required } };
+                }
+            } catch (err) {
+                req.user = {
+                    authInvalid:
+                        {
+                            status: 401,
+                            code: err.name === 'TokenExpiredError'
+                                ? errors.auth.session_expired
+                                : errors.auth.invalid
+                        }
+                };
+            }
+        }
+    }
+    next();
+};
 
 /** À utiliser lorsque l'utilisateur a besoin d'être connecté */
 module.exports.needsAuth = (req, res, next) => {

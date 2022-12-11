@@ -3,7 +3,7 @@ const { DataTypes } = require('sequelize');
 const Climb = require('../classes/climb');
 const Place = require('../classes/place');
 
-const { throwError } = require('../utils/utils');
+const { throwError, round } = require('../utils/utils');
 const validation = require('../utils/validation');
 const errors = require('../json/errors.json');
 const { climbStyle } = require('../utils/enums');
@@ -54,13 +54,14 @@ module.exports = sequelize => {
                 }
             },
             style: {
-                type: DataTypes.STRING(),
+                type: DataTypes.ENUM,
+                values: [...Object.values(climbStyle)],
                 allowNull: false,
-                isIn: {
-                    args: [Object.keys(climbStyle)],
-                    msg: errors.climb.style.not_in
-                },
                 validate: {
+                    isIn: {
+                        args: [Object.values(climbStyle)],
+                        msg: errors.climb.style.not_in
+                    },
                     isValid(value) {
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
                             throwError(errors.climb.style.empty_or_white_spaces);
@@ -77,6 +78,7 @@ module.exports = sequelize => {
                         msg: errors.climb.difficulty_level.not_decimal
                     },
                     isValid(value) {
+                        console.log(value);
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
                             throwError(errors.climb.difficulty_level.empty_or_white_spaces);
                         }
@@ -117,8 +119,7 @@ module.exports = sequelize => {
                 allowNull: false,
                 references: {
                     model: Place,
-                    key: 'id',
-                    as: 'place_id'
+                    key: 'id'
                 },
                 field: 'place_id'
             },
@@ -127,10 +128,15 @@ module.exports = sequelize => {
                 allowNull: false,
                 references: {
                     model: User,
-                    key: 'id',
-                    as: 'userId'
+                    key: 'id'
                 },
                 field: 'user_id'
+            },
+            rate: {
+                type: DataTypes.VIRTUAL,
+                get() {
+                    return round(Number(this.getDataValue('rate')));
+                }
             }
         },
         {

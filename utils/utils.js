@@ -4,6 +4,9 @@ const bcrypt = require('bcrypt');
 const errors = require('../json/errors.json');
 const fs = require('fs');
 
+module.exports.validateAuthenticatedUser = (authenticatedUser, userIdToValidate) =>
+    authenticatedUser.authInvalid || authenticatedUser.id === userIdToValidate;
+
 module.exports.throwError = (code, cause = null, statusCode = null, isModelValidationError = true) => {
     let err = isModelValidationError
         ? new Error(code)
@@ -62,7 +65,7 @@ module.exports.manageError = (err, globalError) => {
         err.errors.forEach(errToManage => {
             // console.log(errToManage);
             let cause = errToManage.path;
-            let model = errToManage.instance.constructor.name.toString().toLowerCase();
+            let model = toSnakeCase(errToManage.instance.constructor.name.toString());
 
             // When validation has many error messages in the error message
             if (errToManage.message.includes(';')) {

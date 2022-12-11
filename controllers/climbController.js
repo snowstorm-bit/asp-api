@@ -1,47 +1,66 @@
 'use strict';
-const { QueryTypes } = require('sequelize');
-const { Climbs, Places, sequelize } = require('../database');
-const { throwError, manageError, round, paginateResponse } = require('../utils/utils');
+const { Op } = require('sequelize');
+const { Climbs, Places, UserRates, sequelize } = require('../database');
+const { throwError, manageError, round, paginateResponse, validateAuthenticatedUser } = require('../utils/utils');
 const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const Place = require('../classes/place');
-const UserRates = require('../classes/userRates');
+const UserRatesModel = require('../classes/userRates');
 
 exports.getAll = async (req, res, next) => {
     try {
-        let whereQueryString = '';
-
-        if (req.query.rate !== undefined) {
-            whereQueryString += `WHERE row.totalRate BETWEEN ${ req.query.rate[0] } AND ${ req.query.rate[1] }`;
+        // trim query values
+        let query = {};
+        for (let [key, value] of Object.entries(req.query)) {
+            if (Array.isArray(value)) {
+                value.forEach(v => {
+                    if (typeof value === 'string') {
+                        v = v.trim();
+                    }
+                });
+            } else if (typeof value === 'string') {
+                value = value.trim();
+            }
+            query[key] = value;
         }
 
-        let whereSubQuery = [];
+        // Set criterias for search
+        let where = {};
+        let having = {};
+        if (req.query.rate !== undefined) {
+            having.rate = { [Op.between]: req.query.rate };
+        }
         if (req.query.place !== undefined) {
-            whereSubQuery.push(`p.title = '${ req.query.place }'`);
+            where['$Place.title$'] = req.query.place;
         }
         if (req.query.style !== undefined) {
-            if (typeof req.query.style === 'string') {
-                whereSubQuery.push(`c.style = '${ req.query.style }'`);
-            } else {
-                let styleWhereStatement = '';
-                styleWhereStatement += `c.style IN ('${ req.query.style[0] }'`;
-                for (let i = 1; i < req.query.style.length; i++) {
-                    styleWhereStatement += `, '${ req.query.style[i] }'`;
-                }
-                styleWhereStatement += ')';
-                whereSubQuery.push(styleWhereStatement);
-            }
+            where.style = typeof req.query.style === 'string'
+                ? req.query.style
+                : { [Op.or]: req.query.style };
         }
         if (req.query.difficultyLevel !== undefined) {
+            // get min and max decimal
             let [, minDecimal] = String(req.query.difficultyLevel[0]).split('.');
             let [, maxDecimal] = String(req.query.difficultyLevel[1]).split('.');
             minDecimal = Number(minDecimal);
             maxDecimal = Number(maxDecimal);
+
+            // set step and min decimal if 10 or superior
+            // ex : bad -> 5.10 + 0.1 => 5.2
+            //      good -> 5.10 + 0.01 => 5.11
+            let step = 0.1;
+            if (minDecimal === 1 || minDecimal === 10) {
+                minDecimal = 10;
+            }
+            if (minDecimal >= 10) {
+                step = 0.01;
+            }
+
+            // create array to get values between range specified
             let decimalDifference = maxDecimal - minDecimal + 1;
             let difficultyLevelRange = [];
             difficultyLevelRange.push(`5.${ minDecimal }`);
-            let step = 0.1;
             for (let i = 1; i < decimalDifference; i++) {
                 if (Number(difficultyLevelRange[i - 1]) === 5.9) {
                     difficultyLevelRange.push('5.10');
@@ -51,27 +70,8 @@ exports.getAll = async (req, res, next) => {
                 }
             }
 
-            let difficultyLevelWhereStatement = '';
-            difficultyLevelWhereStatement += `c.difficulty_level IN ('${ difficultyLevelRange[0] }'`;
-            for (let i = 1; i < difficultyLevelRange.length; i++) {
-                difficultyLevelWhereStatement += `, '${ difficultyLevelRange[i] }'`;
-            }
-            difficultyLevelWhereStatement += ')';
-            whereSubQuery.push(difficultyLevelWhereStatement);
+            where.difficultyLevel = difficultyLevelRange;
         }
-
-        let whereSubQueryString = '';
-        if (whereSubQuery.length > 0) {
-            whereSubQueryString += `WHERE ${ whereSubQuery[0] }`;
-            for (let i = 1; i < whereSubQuery.length; i++) {
-                whereSubQueryString += ` AND ${ whereSubQuery[i] }`;
-            }
-            whereSubQueryString += ' ';
-        }
-
-        let rowCols = 'row.title, row.description, row.style, row.images, row.placeTitle, row.totalRate as rate, row.votes';
-        let descriptionLiteralStatement = 'IF(CHAR_LENGTH(c.description) > 60, CONCAT(SUBSTRING(c.description, 1, 100), \'...\'), SUBSTRING(c.description, 1, 100)) AS description';
-        let subQueryCols = `c.title, ${ descriptionLiteralStatement }, c.style, c.images, p.title AS placeTitle, AVG(ur.rate) AS totalRate, COUNT(ur.climb_id) AS votes`;
 
         let searchCriterias = {
             offset: Number(req.query.offset) || 0,
@@ -82,31 +82,74 @@ exports.getAll = async (req, res, next) => {
                 : 15
         };
 
-        let queryString = `SELECT ${ rowCols }
-                           FROM (SELECT ${ subQueryCols }
-                                 FROM user_rates ur
-                                          INNER JOIN climbs c ON ur.climb_id = c.id
-                                          INNER JOIN places p ON c.place_id = p.id
-                                     ${ whereSubQueryString }
-                                 GROUP BY c.id) AS row
-                               ${ whereQueryString }
-                           ORDER BY row.totalRate DESC, row.votes DESC, row.title ASC
-                               LIMIT ${ searchCriterias.limit }
-                           OFFSET ${ searchCriterias.offset }`;
+        let orderDefault = {
+            rate: 'DESC',
+            votes: 'DESC',
+            title: 'ASC'
+        };
+        let order = Object.entries(orderDefault);
 
-        let climbs = await sequelize.query(queryString,
-            {
-                logging: console.log,
-                raw: false,
-                type: QueryTypes.SELECT
-            });
+        // set find options for find queries
+        let findOptions = {
+            include: [
+                {
+                    model: UserRatesModel,
+                    attributes: [],
+                    required: true
+                },
+                {
+                    model: Place,
+                    attributes: [],
+                    required: true
+                }
+            ],
+            where: where,
+            group: ['UserRate.climb_id'],
+            having: having,
+            order: order
+        };
 
-        climbs.forEach(climb => {
-            climb.images = climb.images.split(';')[0];
-            climb.rate = round(Number(climb.rate));
+        // set options for findAll query
+        let findAllOptions = findOptions;
+
+        let descriptionLiteralStatement = 'IF(CHAR_LENGTH(Climb.description) > 60, CONCAT(SUBSTRING(Climb.description, 1, 100), \'...\'), SUBSTRING(Climb.description, 1, 100)) AS description';
+        findAllOptions.attributes = [
+            'title', sequelize.literal(descriptionLiteralStatement), 'images',
+            [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
+            [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
+            [sequelize.col('Place.title'), 'placeTitle']
+        ];
+        findAllOptions.limit = searchCriterias.limit;
+        findAllOptions.offset = searchCriterias.offset;
+
+        let results = await Climbs.findAll(findAllOptions);
+
+        let climbs = [];
+        results.forEach(result => {
+            let climb = result.toJSON();
+            climb.image = climb.images[0];
+            climbs.push(climb);
         });
 
         let result = paginateResponse(climbs, searchCriterias.offset, searchCriterias.limit);
+
+        // Find next if there is possibly more results
+        if (result.hasMoreResult) {
+            // set options for findOne query
+            let findOneOptions = findOptions;
+            findOneOptions.attributes = [
+                'title',
+                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
+                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
+            ];
+            findOneOptions.offset = result.offset;
+
+            let nextClimb = await Climbs.findOne(findOneOptions);
+
+            if (nextClimb === null) {
+                result.hasMoreResult = false;
+            }
+        }
 
         if (req.query.limit && !req.query.limit.includes('top-10')) {
             result.placeTitles = await Places.findAll({
@@ -115,7 +158,6 @@ exports.getAll = async (req, res, next) => {
             result.styles = climbStyle;
         }
 
-        console.log('result', result);
         res.status(200).json({
             code: successes.routes.all.climbs,
             status: status.success,
@@ -137,25 +179,27 @@ exports.getCreated = async (req, res, next) => {
             limit: req.query.limit ? Number(req.query.limit) : 15
         };
 
-        let createdClimbs = await Climbs.findAll({
+        let findOptions = {
             attributes: ['title'],
             where: {
                 userId: req.user.id
-            },
-            offset: searchCriterias.offset,
-            limit: searchCriterias.limit
-        });
+            }
+        };
+
+        let findAllOptions = findOptions;
+        findAllOptions.offset = searchCriterias.offset;
+        findAllOptions.limit = searchCriterias.limit;
+
+        let createdClimbs = await Climbs.findAll(findAllOptions);
 
         let result = paginateResponse(createdClimbs, searchCriterias.offset, searchCriterias.limit);
 
+        // Find next if there is possibly more results
         if (result.hasMoreResult) {
-            let nextCreatedClimb = await Climbs.findOne({
-                attributes: ['id'],
-                where: {
-                    userId: req.user.id
-                },
-                offset: result.offset
-            });
+            let findOneOptions = findOptions;
+            findOneOptions.offset = result.offset;
+
+            let nextCreatedClimb = await Climbs.findOne(findOneOptions);
 
             if (nextCreatedClimb === null) {
                 result.hasMoreResult = false;
@@ -175,52 +219,44 @@ exports.getCreated = async (req, res, next) => {
     }
 };
 
-exports.getVoted = async (req, res, next) => {
+exports.getRated = async (req, res, next) => {
     try {
         let searchCriterias = {
             offset: Number(req.query.offset) || 0,
             limit: req.query.limit ? Number(req.query.limit) : 15
         };
 
-        let results = await Climbs.findAll({
-            attributes: [
-                'id', 'title',
-                [sequelize.col('UserRate.rate'), 'rate']
-            ],
+        let findOptions = {
             include: {
-                model: UserRates,
-                attributes: ['rate'],
+                model: UserRatesModel,
+                attributes: [],
                 where: {
                     userId: req.user.id
                 }
-            },
-            offset: searchCriterias.offset,
-            limit: searchCriterias.limit
-        });
+            }
+        };
 
-        let votedClimbs = [];
+        let findAllOptions = findOptions;
+        findAllOptions.attributes = ['title', [sequelize.col('UserRate.rate'), 'rate']];
+        findAllOptions.offset = searchCriterias.offset;
+        findAllOptions.limit = searchCriterias.limit;
 
-        results.forEach(result => votedClimbs.push({
-            title: result.title,
-            rate: result.rate
-        }));
+        let results = await Climbs.findAll(findAllOptions);
 
-        let result = paginateResponse(votedClimbs, searchCriterias.offset, searchCriterias.limit);
+        let ratedClimbs = [];
+        results.forEach(result => ratedClimbs.push(result.toJSON()));
 
+        let result = paginateResponse(ratedClimbs, searchCriterias.offset, searchCriterias.limit);
+
+        // Find next if there is possibly more results
         if (result.hasMoreResult) {
-            let nextVotedClimb = await Climbs.findOne({
-                attributes: ['id'],
-                include: {
-                    model: UserRates,
-                    attributes: [],
-                    where: {
-                        userId: req.user.id
-                    }
-                },
-                offset: result.offset
-            });
+            let findOneOptions = findOptions;
+            findOneOptions.attributes = ['id'];
+            findOneOptions.offset = result.offset;
 
-            if (nextVotedClimb === null) {
+            let nextRatedClimb = await Climbs.findOne(findOneOptions);
+
+            if (nextRatedClimb === null) {
                 result.hasMoreResult = false;
             }
         }
@@ -232,61 +268,74 @@ exports.getVoted = async (req, res, next) => {
         });
     } catch (err) {
         next(manageError(err, {
-            code: errors.routes.details.account.voted_climbs,
-            cause: 'voted_climbs'
+            code: errors.routes.details.account.rated_climbs,
+            cause: 'rated_climbs'
         }));
     }
 };
 
 exports.getOne = async (req, res, next) => {
     try {
-        let result = await Climbs.findOne({
+        let climb = await Climbs.findOne({
+            attributes: ['id'],
+            where: {
+                title: req.params.title
+            }
+        });
+
+        if (climb === null) {
+            throwError(errors.climb.not_found, 'climb_details', 404, false);
+        }
+
+        let result = (await Climbs.findOne({
             attributes: [
-                'id', 'title', 'description', 'style', 'difficultyLevel', 'images',
+                'title', 'description', 'style', 'difficultyLevel', 'images', 'userId',
                 [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
-                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
+                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
+                [sequelize.col('Place.title'), 'placeTitle']
             ],
             include: [
                 {
-                    model: UserRates,
-                    attributes: ['climbId', 'rate'],
+                    model: UserRatesModel,
+                    attributes: [],
                     required: true
                 },
                 {
                     model: Place,
-                    attributes: ['title'],
+                    attributes: [],
                     required: true
                 }
             ],
             where: {
                 title: req.params.title
             },
-            group: ['UserRate.climb_id'],
-            raw: true
-        });
+            group: ['UserRate.climb_id']
+        })).toJSON();
 
-        if (result === null) {
-            throwError(errors.climb.not_found, 'climb_details', 404, false);
+        if (req.user.id && req.user.accessLevel === 1) {
+            let userRate = (await UserRates.findOne({
+                attributes: ['rate'],
+                where: {
+                    climbId: climb.id,
+                    userId: req.user.id
+                }
+            })).toJSON();
+
+            result.userRate = userRate.rate || 0;
         }
+
+        result.isCreator = validateAuthenticatedUser(req.user, result.userId);
+        delete result.userId;
 
         res.status(200).json({
             code: successes.routes.details.climb,
             status: status.success,
-            result: {
-                title: result.title,
-                description: result.description,
-                style: result.style,
-                image: result.images.split(';')[0],
-                difficultyLevel: result.difficultyLevel,
-                placeTitle: result.Place.title,
-                rate: round(Number(result.rate)),
-                votes: result.votes,
-                isCreator: req.user.status || req.user.id === result.userId
-            }
+            result: result
         });
     } catch (err) {
+        console.log(err);
         next(manageError(err, {
-            code: errors.routes.details.place,
+            code: errors.routes.details.climb,
             cause: 'climb_details'
         }));
     }
@@ -324,7 +373,7 @@ exports.create = async (req, res, next) => {
         });
 
         if (place === null) {
-            throwError(errors.climb.place_title.not_found, 'place_title', 404, false);
+            throwError(errors.climb.place_title.not_found, 'placeTitle', 404, false);
         }
 
         let result = await Climbs.findOne({
@@ -340,14 +389,14 @@ exports.create = async (req, res, next) => {
         }
 
         if (req.body.difficultyLevel === '5.1') {
-            throwError(errors.climb.difficulty_level.range, 'difficulty_level', 422, false);
+            throwError(errors.climb.difficulty_level.range, 'difficultyLevel', 422, false);
         }
 
-        let climb = await Climbs.create({
+        await Climbs.create({
             title: req.body.title,
             description: req.body.description,
             style: req.body.style,
-            difficultyLevel: Number(req.body.difficultyLevel),
+            difficultyLevel: req.body.difficultyLevel,
             images: req.body.images,
             placeId: place.id,
             userId: req.user.id
@@ -357,7 +406,7 @@ exports.create = async (req, res, next) => {
             code: successes.routes.create.climb,
             status: status.success,
             result: {
-                title: climb.title
+                title: req.body.title
             }
         });
     } catch (err) {
@@ -371,48 +420,41 @@ exports.create = async (req, res, next) => {
 
 exports.getForUpdate = async (req, res, next) => {
     try {
-        let result = await Climbs.findOne({
+        let foundResult = await Climbs.findOne({
             attributes: ['userId'],
             where: {
                 title: req.params.title
             }
         });
 
-        if (result === null) {
+        if (foundResult === null) {
             throwError(errors.climb.not_found, 'update_climb', 404, false);
-        } else if (result.userId !== req.user.id) {
-            throwError(errors.auth.unauthorized, 'update_climb', 403, false);
+        } else if (foundResult.userId !== req.user.id) {
+            throwError(errors.auth.unauthorized, 'authentication', 403, false);
         }
 
-        let climb = await Climbs.findOne({
+        let result = (await Climbs.findOne({
             attributes: [
-                'title', 'description', 'style', 'difficultyLevel', 'images'
+                'title', 'description', 'style', 'difficultyLevel', 'images',
+                [sequelize.col('Place.title'), 'placeTitle']
             ],
             include: {
                 model: Place,
-                attributes: ['title'],
+                attributes: [],
                 required: true
             },
             where: {
                 title: req.params.title
             }
-        });
+        })).toJSON();
 
-        let placeTitles = await Places.findAll({ attributes: ['title'] });
+        result.placeTitles = await Places.findAll({ attributes: ['title'] });
+        result.styles = climbStyle;
 
         res.status(200).json({
             code: successes.routes.update.climb,
             status: status.success,
-            result: {
-                title: climb.title,
-                description: climb.description,
-                style: climb.style,
-                styles: climbStyle,
-                difficultyLevel: climb.difficultyLevel,
-                images: climb.images,
-                placeTitle: climb.Place.title,
-                placeTitles: placeTitles
-            }
+            result: result
         });
     } catch (err) {
         next(manageError(err, {
@@ -432,7 +474,7 @@ exports.update = async (req, res, next) => {
         });
 
         if (place === null) {
-            throwError(errors.climb.place_title.not_found, 'place_title', 404, false);
+            throwError(errors.climb.place_title.not_found, 'placeTitle', 404, false);
         }
 
         let result = await Climbs.findOne({
@@ -445,7 +487,7 @@ exports.update = async (req, res, next) => {
         if (result === null) {
             throwError(errors.climb.not_found, 'update_climb', 404, false);
         } else if (result.userId !== req.user.id) {
-            throwError(errors.auth.unauthorized, 'update_climb', 403, false);
+            throwError(errors.auth.unauthorized, 'authentication', 403, false);
         }
 
         // If the title of the climb has changed but the result is equals to the changed title,
@@ -466,25 +508,23 @@ exports.update = async (req, res, next) => {
         images.push(...req.body.images);
 
         if (req.body.difficultyLevel === '5.1') {
-            throwError(errors.climb.difficulty_level.range, 'difficulty_level', 422, false);
+            throwError(errors.climb.difficulty_level.range, 'difficultyLevel', 422, false);
         }
 
-        let climb = await result.set({
+        await result.update({
             title: req.body.title,
             description: req.body.description,
             style: req.body.style,
-            difficultyLevel: Number(req.body.difficultyLevel),
+            difficultyLevel: req.body.difficultyLevel,
             images: images,
             placeId: place.id
         });
-
-        await climb.save();
 
         res.status(200).json({
             code: successes.routes.update.climb,
             status: status.success,
             result: {
-                title: climb.title
+                title: req.body.title
             }
         });
     } catch (err) {
@@ -522,6 +562,128 @@ exports.delete = async (req, res, next) => {
         next(manageError(err, {
             code: errors.routes.delete.climb,
             cause: 'delete_climb'
+        }));
+    }
+};
+
+exports.rateOne = async (req, res, next) => {
+    try {
+        let climb = await Climbs.findOne({
+            attributes: ['id'],
+            include: [
+                {
+                    model: UserRatesModel,
+                    attributes: [],
+                    required: true
+                }
+            ],
+            where: {
+                title: req.params.title
+            }
+        });
+
+        if (climb === null) {
+            throwError(errors.routes.rate.climb_not_found, 'rate_climb', 404, false);
+        }
+
+        let [_, created] = await UserRates.upsert({
+            climbId: climb.id,
+            userId: req.user.id,
+            rate: req.body.rate
+        }, { validate: true });
+
+        climb = (await Climbs.findOne({
+            attributes: [
+                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
+                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
+            ],
+            include: [
+                {
+                    model: UserRatesModel,
+                    attributes: [],
+                    required: true
+                }
+            ],
+            where: {
+                title: req.params.title
+            },
+            group: ['UserRate.climb_id']
+        })).toJSON();
+
+        delete climb.id;
+        climb.userRate = req.body.rate;
+
+        res.status(created ? 201 : 200).json({
+            code: successes.routes[created ? 'create' : 'update'].rate.climb,
+            status: status.success,
+            result: climb
+        });
+    } catch (err) {
+        console.log(err);
+        next(manageError(err, {
+            code: errors.routes.rate.climb,
+            cause: 'rate_climb'
+        }));
+    }
+};
+
+exports.deleteOneRate = async (req, res, next) => {
+    try {
+        let climb = await Climbs.findOne({
+            attributes: ['id'],
+            where: {
+                title: req.params.title
+            }
+        });
+
+        if (climb === null) {
+            throwError(errors.routes.rate.climb_not_found, 'rate_climb', 404, false);
+        }
+
+        let result = await UserRates.findOne({
+            attributes: ['climbId', 'userId'],
+            where: {
+                climbId: climb.id,
+                userId: req.user.id
+            }
+        });
+
+        if (result === null) {
+            throwError(errors.routes.rate.not_found, 'rate_climb', 404, false);
+        }
+
+        await result.destroy();
+
+        climb = (await Climbs.findOne({
+            attributes: [
+                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
+                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
+            ],
+            include: [
+                {
+                    model: UserRatesModel,
+                    attributes: [],
+                    required: true
+                }
+            ],
+            where: {
+                title: req.params.title
+            },
+            group: ['UserRate.climb_id']
+        })).toJSON();
+
+        climb.userRate = 0;
+
+        res.status(200).json({
+            code: successes.routes.delete.rate.climb,
+            status: status.success,
+            result: climb
+        });
+    } catch (err) {
+        console.log(err);
+        next(manageError(err, {
+            code: errors.routes.rate.climb,
+            cause: 'rate_climb'
         }));
     }
 };

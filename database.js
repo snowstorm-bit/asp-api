@@ -25,15 +25,16 @@ db.PlaceHasManyClimbAssociation = Place.hasMany(Climb, {
     foreignKey: {
         name: 'placeId',
         field: 'place_id',
-        underscored: true,
         allowNull: false
     }
 });
 
 db.ClimbBelongsToPlaceAssociation = Climb.belongsTo(Place, {
-    foreignKey: 'place_id'
+    foreignKey: {
+        name: 'placeId',
+        field: 'place_id'
+    }
 });
-
 
 // Defining user climbs relation
 db.UserHasManyClimbAssociation = User.hasMany(Climb, {
@@ -47,13 +48,17 @@ db.UserHasManyClimbAssociation = User.hasMany(Climb, {
 });
 
 db.ClimbBelongsToUserAssociation = Climb.belongsTo(User, {
-    foreignKey: 'user_id'
+    foreignKey: {
+        name: 'userId',
+        field: 'user_id'
+    }
 });
 
 // Defining user rates relation
 User.hasMany(UserRates, {
     foreignKey: {
-        name: 'user_id',
+        name: 'userId',
+        field: 'user_id',
         allowNull: false
     },
     onDelete: 'CASCADE',
@@ -61,18 +66,25 @@ User.hasMany(UserRates, {
 });
 
 UserRates.belongsTo(User, {
-    foreignKey: 'user_id'
+    foreignKey: {
+        name: 'userId',
+        field: 'user_id'
+    }
 });
 
 Climb.hasOne(UserRates, {
     foreignKey: {
-        name: 'climb_id',
+        name: 'climbId',
+        field: 'climb_id',
         allowNull: false
     }
 });
 
 UserRates.belongsTo(Climb, {
-    foreignKey: 'climb_id'
+    foreignKey: {
+        name: 'climbId',
+        field: 'climb_id'
+    }
 });
 
 db.sequelize = sequelize;
