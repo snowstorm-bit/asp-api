@@ -5,7 +5,7 @@ const router = express.Router();
 const { isAuth, needsAdminAuth, needsUserAuth } = require('../middlewares/is-auth');
 const climbController = require('../controllers/climbController');
 
-router.get('/all', climbController.getAll);
+router.get('/all', isAuth, climbController.getAll);
 router.get('/details/:title', isAuth, climbController.getOne);
 router.get('/', needsUserAuth, climbController.getForCreate);
 router.post('/', needsUserAuth, climbController.create);

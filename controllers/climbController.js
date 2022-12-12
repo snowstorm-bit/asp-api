@@ -158,6 +158,10 @@ exports.getAll = async (req, res, next) => {
             result.styles = climbStyle;
         }
 
+        if ('authInvalid' in req.user) {
+            result.isAuth = req.user.authInvalid;
+        }
+
         res.status(200).json({
             code: successes.routes.all.climbs,
             status: status.success,
