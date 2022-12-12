@@ -112,9 +112,9 @@ exports.getAll = async (req, res, next) => {
         // set options for findAll query
         let findAllOptions = findOptions;
 
-        let descriptionLiteralStatement = 'IF(CHAR_LENGTH(Climb.description) > 60, CONCAT(SUBSTRING(Climb.description, 1, 100), \'...\'), SUBSTRING(Climb.description, 1, 100)) AS description';
+        let descriptionLiteralStatement = 'IF(CHAR_LENGTH(Climb.description) > 60, CONCAT(SUBSTRING(Climb.description, 1, 100), \'...\'), SUBSTRING(Climb.description, 1, 100))';
         findAllOptions.attributes = [
-            'title', sequelize.literal(descriptionLiteralStatement), 'images',
+            'title', [sequelize.literal(descriptionLiteralStatement), 'description'], 'images',
             [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
             [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
             [sequelize.col('Place.title'), 'placeTitle']
@@ -126,6 +126,7 @@ exports.getAll = async (req, res, next) => {
 
         let climbs = [];
         results.forEach(result => {
+            console.log(result.description);
             let climb = result.toJSON();
             climb.image = climb.images[0];
             climbs.push(climb);
