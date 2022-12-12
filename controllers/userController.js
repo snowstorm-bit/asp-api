@@ -104,7 +104,7 @@ exports.getProfile = async (req, res, next) => {
             code: successes.routes.details.account,
             status: status.success,
             result: {
-                username: user.username
+                username: user?.username
             }
         });
     } catch (err) {
