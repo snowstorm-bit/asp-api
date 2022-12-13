@@ -2,16 +2,17 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const database = require('./database');
 const userRoutes = require('./routes/userRoutes');
 const placeRoutes = require('./routes/placeRoutes');
 const climbRoutes = require('./routes/climbRoutes');
+
 const path = require('path');
 
 const { status } = require('./utils/enums');
 const { uploadFiles } = require('./utils/utils');
-const { needsUserAuth } = require('./middlewares/is-auth');
-
+const { needsAuth } = require('./middlewares/is-auth');
+const { createDatabaseIfNotExists } = require('./database/initialize');
+const { createSequelizeEntryPoint } = require('./database/config');
 const app = express();
 
 app.use(bodyParser.json());
@@ -32,9 +33,8 @@ app.use((req, res, next) => {
     next();
 });
 
-app.post('/upload', needsUserAuth, (req, res, next) => {
+app.post('/upload', needsAuth, (req, res, next) => {
     try {
-        console.log(req.body.file.filename);
         if (req.body.file !== undefined && req.body.file !== null) {
             uploadFiles(req.body.file);
         }
@@ -42,7 +42,6 @@ app.post('/upload', needsUserAuth, (req, res, next) => {
             status: status.success
         });
     } catch (e) {
-        console.log(e);
         res.status(500).json({
             status: status.error
         });
@@ -56,11 +55,16 @@ app.use((req, res, next) =>
     res.status(404).json({ message: 'Route introuvable !' }));
 
 // Manage error
-app.use((error, req, res, next) =>
+app.use((error, req, res, next) => {
+    console.log(error);
     res.status(error.statusCode || 500).json({
         codes: error.codes,
         status: status.error
-    }));
+    });
+});
 
-app.listen(8080, () =>
-    console.log('App started. Listening on port 8080'));
+app.listen(8080, async () => {
+    console.log('App started. Listening on port 8080');
+    await createSequelizeEntryPoint(await createDatabaseIfNotExists());
+});
+

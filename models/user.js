@@ -25,8 +25,13 @@ module.exports = sequelize => {
                 type: DataTypes.STRING(usernameMaxLength),
                 allowNull: false,
                 validate: {
+                    is: {
+                        args: /^[a-zA-Z -]+$/,
+                        msg: errors.user.username.invalid
+                    },
                     isValid(value) {
-                        if (!validation.validateEmptyOrWhiteSpace(value)) {
+                        let val = String(value);
+                        if (!validation.validateEmptyOrWhiteSpace(val)) {
                             throwError(errors.user.username.empty_or_white_spaces);
                         } else if (!validation.validateRange(value.length, usernameMinLength, usernameMaxLength)) {
                             throwError(errors.user.username.length);

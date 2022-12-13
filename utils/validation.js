@@ -2,8 +2,8 @@
 
 exports.validateEmptyOrWhiteSpace = value => {
     if (typeof value === 'string') {
-        value.trim();
-        return value.length >= 1;
+        let val = value.trim();
+        return val.length >= 1;
     }
     return true;
 };

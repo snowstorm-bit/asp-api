@@ -78,7 +78,6 @@ module.exports = sequelize => {
                         msg: errors.climb.difficulty_level.not_decimal
                     },
                     isValid(value) {
-                        console.log(value);
                         if (!validation.validateEmptyOrWhiteSpace(value)) {
                             throwError(errors.climb.difficulty_level.empty_or_white_spaces);
                         }

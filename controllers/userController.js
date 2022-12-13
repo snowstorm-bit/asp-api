@@ -6,15 +6,15 @@ const bcrypt = require('bcrypt');
 
 const { throwError, manageError } = require('../utils/utils');
 const { status, userAccessLevel } = require('../utils/enums');
-const { Users } = require('../database');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
+const User = require('../classes/user');
 
 dotenv.config();
 
 exports.register = async (req, res, next) => {
     try {
-        let user = await Users.create(
+        let user = await User.create(
             {
                 username: req.body.username,
                 email: req.body.email,
@@ -50,7 +50,7 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
     try {
-        let user = await Users.findOne({
+        let user = await User.findOne({
             attributes: ['id', 'username', 'email', 'password', 'accessLevel'],
             where: {
                 email: req.body.email
@@ -83,7 +83,6 @@ exports.login = async (req, res, next) => {
             )
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.login,
             cause: 'login'
@@ -93,7 +92,7 @@ exports.login = async (req, res, next) => {
 
 exports.getProfile = async (req, res, next) => {
     try {
-        let user = await Users.findOne({
+        let user = await User.findOne({
             attributes: ['username'],
             where: {
                 id: req.user.id
@@ -117,7 +116,7 @@ exports.getProfile = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
     try {
-        let user = await Users.findOne({
+        let user = await User.findOne({
             attributes: ['id'],
             where: {
                 id: req.user.id

@@ -44,7 +44,6 @@ let updateErrorIfNecessary = (model, errorCode, validatorKey, cause) => {
         if (cause.match('[A-Z]')) {
             cause = toSnakeCase(cause);
         }
-        console.log(model, cause, validatorKey, errorCode);
         return errors[model][cause].is_null;
     } else if (validatorKey === 'not_unique') {
         return errors[model].unique_constraint;
@@ -57,13 +56,10 @@ module.exports.manageError = (err, globalError) => {
         codes: {}
     };
 
-    // console.log(err);
-
     // Manage errors return by sequelize validation
     if ('errors' in err) {
         errorToManage.statusCode = 422;
         err.errors.forEach(errToManage => {
-            // console.log(errToManage);
             let cause = errToManage.path;
             let model = toSnakeCase(errToManage.instance.constructor.name.toString());
 
@@ -87,9 +83,13 @@ module.exports.manageError = (err, globalError) => {
                     cause);
 
                 if (typeof error === 'string') {
-                    errorToManage.codes[cause] = error;
+                    if (!(cause in errorToManage.codes)) {
+                        errorToManage.codes[cause] = error;
+                    }
                 } else {
-                    errorToManage.codes[error.cause] = error.code;
+                    if (!(cause in errorToManage.codes)) {
+                        errorToManage.codes[error.cause] = error.code;
+                    }
                 }
             }
         });

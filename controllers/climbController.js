@@ -1,12 +1,16 @@
 'use strict';
 const { Op } = require('sequelize');
-const { Climbs, Places, UserRates, sequelize } = require('../database');
+const config = require('../database/config');
 const { throwError, manageError, round, paginateResponse, validateAuthenticatedUser } = require('../utils/utils');
 const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const Place = require('../classes/place');
 const UserRatesModel = require('../classes/userRates');
+const { getSequelize } = require('../database/config');
+const Climb = require('../classes/climb');
+const UserRates = require('../classes/userRates');
+
 
 exports.getAll = async (req, res, next) => {
     try {
@@ -95,7 +99,7 @@ exports.getAll = async (req, res, next) => {
                 {
                     model: UserRatesModel,
                     attributes: [],
-                    required: true
+                    required: false
                 },
                 {
                     model: Place,
@@ -104,7 +108,7 @@ exports.getAll = async (req, res, next) => {
                 }
             ],
             where: where,
-            group: ['UserRate.climb_id'],
+            group: ['CLimb.id'],
             having: having,
             order: order
         };
@@ -113,20 +117,24 @@ exports.getAll = async (req, res, next) => {
         let findAllOptions = findOptions;
 
         let descriptionLiteralStatement = 'IF(CHAR_LENGTH(Climb.description) > 60, CONCAT(SUBSTRING(Climb.description, 1, 100), \'...\'), SUBSTRING(Climb.description, 1, 100))';
+        let rateLiteralStatement = 'IF(UserRate.rate IS NULL, 0, AVG(UserRate.rate))';
+        let votesLiteralStatement = 'IF(UserRate.climb_id IS NULL, 0, COUNT(UserRate.climb_id))';
+        let sequelize = getSequelize();
         findAllOptions.attributes = [
-            'title', [sequelize.literal(descriptionLiteralStatement), 'description'], 'images',
-            [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
-            [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
+            'title',
+            'images',
+            [sequelize.literal(descriptionLiteralStatement), 'description'],
+            [sequelize.literal(rateLiteralStatement), 'rate'],
+            [sequelize.literal(votesLiteralStatement), 'votes'],
             [sequelize.col('Place.title'), 'placeTitle']
         ];
         findAllOptions.limit = searchCriterias.limit;
         findAllOptions.offset = searchCriterias.offset;
 
-        let results = await Climbs.findAll(findAllOptions);
+        let results = await Climb.findAll(findAllOptions);
 
         let climbs = [];
         results.forEach(result => {
-            console.log(result.description);
             let climb = result.toJSON();
             climb.image = climb.images[0];
             climbs.push(climb);
@@ -145,7 +153,7 @@ exports.getAll = async (req, res, next) => {
             ];
             findOneOptions.offset = result.offset;
 
-            let nextClimb = await Climbs.findOne(findOneOptions);
+            let nextClimb = await Climb.findOne(findOneOptions);
 
             if (nextClimb === null) {
                 result.hasMoreResult = false;
@@ -153,7 +161,7 @@ exports.getAll = async (req, res, next) => {
         }
 
         if (req.query.limit && !req.query.limit.includes('top-10')) {
-            result.placeTitles = await Places.findAll({
+            result.placeTitles = await Place.findAll({
                 attributes: ['title']
             });
             result.styles = climbStyle;
@@ -169,7 +177,6 @@ exports.getAll = async (req, res, next) => {
             result: result
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.all.climbs,
             cause: 'climb_all'
@@ -195,7 +202,7 @@ exports.getCreated = async (req, res, next) => {
         findAllOptions.offset = searchCriterias.offset;
         findAllOptions.limit = searchCriterias.limit;
 
-        let createdClimbs = await Climbs.findAll(findAllOptions);
+        let createdClimbs = await Climb.findAll(findAllOptions);
 
         let result = paginateResponse(createdClimbs, searchCriterias.offset, searchCriterias.limit);
 
@@ -204,7 +211,7 @@ exports.getCreated = async (req, res, next) => {
             let findOneOptions = findOptions;
             findOneOptions.offset = result.offset;
 
-            let nextCreatedClimb = await Climbs.findOne(findOneOptions);
+            let nextCreatedClimb = await Climb.findOne(findOneOptions);
 
             if (nextCreatedClimb === null) {
                 result.hasMoreResult = false;
@@ -242,11 +249,13 @@ exports.getRated = async (req, res, next) => {
         };
 
         let findAllOptions = findOptions;
+
+        let sequelize = getSequelize();
         findAllOptions.attributes = ['title', [sequelize.col('UserRate.rate'), 'rate']];
         findAllOptions.offset = searchCriterias.offset;
         findAllOptions.limit = searchCriterias.limit;
 
-        let results = await Climbs.findAll(findAllOptions);
+        let results = await Climb.findAll(findAllOptions);
 
         let ratedClimbs = [];
         results.forEach(result => ratedClimbs.push(result.toJSON()));
@@ -259,7 +268,7 @@ exports.getRated = async (req, res, next) => {
             findOneOptions.attributes = ['id'];
             findOneOptions.offset = result.offset;
 
-            let nextRatedClimb = await Climbs.findOne(findOneOptions);
+            let nextRatedClimb = await Climb.findOne(findOneOptions);
 
             if (nextRatedClimb === null) {
                 result.hasMoreResult = false;
@@ -281,7 +290,7 @@ exports.getRated = async (req, res, next) => {
 
 exports.getOne = async (req, res, next) => {
     try {
-        let climb = await Climbs.findOne({
+        let climb = await Climb.findOne({
             attributes: ['id'],
             where: {
                 title: req.params.title
@@ -292,7 +301,9 @@ exports.getOne = async (req, res, next) => {
             throwError(errors.climb.not_found, 'climb_details', 404, false);
         }
 
-        let result = (await Climbs.findOne({
+        let sequelize = getSequelize();
+
+        let result = (await Climb.findOne({
             attributes: [
                 'title', 'description', 'style', 'difficultyLevel', 'images', 'userId',
                 [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
@@ -318,15 +329,15 @@ exports.getOne = async (req, res, next) => {
         })).toJSON();
 
         if (req.user.id && req.user.accessLevel === 1) {
-            let userRate = (await UserRates.findOne({
+            let userRate = await UserRates.findOne({
                 attributes: ['rate'],
                 where: {
                     climbId: climb.id,
                     userId: req.user.id
                 }
-            })).toJSON();
+            });
 
-            result.userRate = userRate.rate || 0;
+            result.userRate = userRate ? userRate.toJSON().rate : 0;
         }
 
         result.isCreator = validateAuthenticatedUser(req.user, result.userId);
@@ -338,7 +349,6 @@ exports.getOne = async (req, res, next) => {
             result: result
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.details.climb,
             cause: 'climb_details'
@@ -348,7 +358,7 @@ exports.getOne = async (req, res, next) => {
 
 exports.getForCreate = async (req, res, next) => {
     try {
-        let placeTitles = await Places.findAll({
+        let placeTitles = await Place.findAll({
             attributes: ['title']
         });
 
@@ -370,7 +380,7 @@ exports.getForCreate = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try {
-        let place = await Places.findOne({
+        let place = await Place.findOne({
             attributes: ['id'],
             where: {
                 title: req.body.placeTitle
@@ -381,7 +391,7 @@ exports.create = async (req, res, next) => {
             throwError(errors.climb.place_title.not_found, 'placeTitle', 404, false);
         }
 
-        let result = await Climbs.findOne({
+        let result = await Climb.findOne({
             attributes: ['title'],
             where: {
                 placeId: place.id,
@@ -397,7 +407,7 @@ exports.create = async (req, res, next) => {
             throwError(errors.climb.difficulty_level.range, 'difficultyLevel', 422, false);
         }
 
-        await Climbs.create({
+        await Climb.create({
             title: req.body.title,
             description: req.body.description,
             style: req.body.style,
@@ -425,7 +435,7 @@ exports.create = async (req, res, next) => {
 
 exports.getForUpdate = async (req, res, next) => {
     try {
-        let foundResult = await Climbs.findOne({
+        let foundResult = await Climb.findOne({
             attributes: ['userId'],
             where: {
                 title: req.params.title
@@ -438,7 +448,9 @@ exports.getForUpdate = async (req, res, next) => {
             throwError(errors.auth.unauthorized, 'authentication', 403, false);
         }
 
-        let result = (await Climbs.findOne({
+        let sequelize = getSequelize();
+
+        let result = (await Climb.findOne({
             attributes: [
                 'title', 'description', 'style', 'difficultyLevel', 'images',
                 [sequelize.col('Place.title'), 'placeTitle']
@@ -453,7 +465,7 @@ exports.getForUpdate = async (req, res, next) => {
             }
         })).toJSON();
 
-        result.placeTitles = await Places.findAll({ attributes: ['title'] });
+        result.placeTitles = await Place.findAll({ attributes: ['title'] });
         result.styles = climbStyle;
 
         res.status(200).json({
@@ -471,7 +483,7 @@ exports.getForUpdate = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
     try {
-        let place = await Places.findOne({
+        let place = await Place.findOne({
             attributes: ['id'],
             where: {
                 title: req.body.placeTitle
@@ -482,7 +494,7 @@ exports.update = async (req, res, next) => {
             throwError(errors.climb.place_title.not_found, 'placeTitle', 404, false);
         }
 
-        let result = await Climbs.findOne({
+        let result = await Climb.findOne({
             attributes: ['id', 'userId', 'images'],
             where: {
                 title: req.params.title
@@ -497,7 +509,7 @@ exports.update = async (req, res, next) => {
 
         // If the title of the climb has changed but the result is equals to the changed title,
         // this means the title is already associated to an other place
-        let resultForUniqueConstraint = await Climbs.findOne({
+        let resultForUniqueConstraint = await Climb.findOne({
             attributes: ['title'],
             where: {
                 placeId: place.id,
@@ -542,7 +554,7 @@ exports.update = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
     try {
-        let climb = await Climbs.findOne({
+        let climb = await Climb.findOne({
             attributes: ['id', 'title'],
             where: {
                 title: req.params.title
@@ -563,7 +575,6 @@ exports.delete = async (req, res, next) => {
             }
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.delete.climb,
             cause: 'delete_climb'
@@ -573,7 +584,7 @@ exports.delete = async (req, res, next) => {
 
 exports.rateOne = async (req, res, next) => {
     try {
-        let climb = await Climbs.findOne({
+        let climb = await Climb.findOne({
             attributes: ['id'],
             include: [
                 {
@@ -597,7 +608,9 @@ exports.rateOne = async (req, res, next) => {
             rate: req.body.rate
         }, { validate: true });
 
-        climb = (await Climbs.findOne({
+        let sequelize = getSequelize();
+
+        climb = (await Climb.findOne({
             attributes: [
                 [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
                 [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
@@ -624,7 +637,6 @@ exports.rateOne = async (req, res, next) => {
             result: climb
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.rate.climb,
             cause: 'rate_climb'
@@ -634,7 +646,7 @@ exports.rateOne = async (req, res, next) => {
 
 exports.deleteOneRate = async (req, res, next) => {
     try {
-        let climb = await Climbs.findOne({
+        let climb = await Climb.findOne({
             attributes: ['id'],
             where: {
                 title: req.params.title
@@ -659,7 +671,9 @@ exports.deleteOneRate = async (req, res, next) => {
 
         await result.destroy();
 
-        climb = (await Climbs.findOne({
+        let sequelize = getSequelize();
+
+        climb = (await Climb.findOne({
             attributes: [
                 [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
                 [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
@@ -685,7 +699,6 @@ exports.deleteOneRate = async (req, res, next) => {
             result: climb
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.rate.climb,
             cause: 'rate_climb'

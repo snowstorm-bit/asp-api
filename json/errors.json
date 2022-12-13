@@ -7,7 +7,8 @@
 		"username": {
 			"is_null": "errors.fields.user.username.is_null",
 			"empty_or_white_spaces": "errors.fields.user.username.empty_or_white_spaces",
-			"length": "errors.fields.user.username.length"
+			"length": "errors.fields.user.username.length",
+			"invalid": "errors.fields.user.username.invalid"
 		},
 		"email": {
 			"not_found": "errors.fields.user.email.not_found",

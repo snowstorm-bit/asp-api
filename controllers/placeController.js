@@ -1,12 +1,14 @@
 'use strict';
 
-const { Places, Climbs, sequelize } = require('../database');
-const { throwError, manageError, round, paginateResponse, validateAuthenticatedUser } = require('../utils/utils');
+const { throwError, manageError, paginateResponse, validateAuthenticatedUser } = require('../utils/utils');
 const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
 const successes = require('../json/successes.json');
 const UserRates = require('../classes/userRates');
 const dotenv = require('dotenv');
+const Place = require('../classes/place');
+const Climb = require('../classes/climb');
+const { getSequelize } = require('../database/config');
 dotenv.config();
 
 exports.getCreated = async (req, res, next) => {
@@ -27,7 +29,7 @@ exports.getCreated = async (req, res, next) => {
         findAllOptions.offset = searchCriterias.offset;
         findAllOptions.limit = searchCriterias.limit;
 
-        let createdPlaces = await Places.findAll(findAllOptions);
+        let createdPlaces = await Place.findAll(findAllOptions);
 
         let result = paginateResponse(createdPlaces, searchCriterias.offset, searchCriterias.limit);
 
@@ -35,7 +37,7 @@ exports.getCreated = async (req, res, next) => {
             let findOneOptions = findOptions;
             findOneOptions.offset = result.offset;
 
-            let nextCreatedPlace = await Places.findOne(findOneOptions);
+            let nextCreatedPlace = await Place.findOne(findOneOptions);
 
             if (nextCreatedPlace === null) {
                 result.hasMoreResult = false;
@@ -57,7 +59,7 @@ exports.getCreated = async (req, res, next) => {
 
 exports.getOne = async (req, res, next) => {
     try {
-        let result = await Places.findOne({
+        let result = await Place.findOne({
             attributes: ['id', 'title', 'description', 'steps', 'latitude', 'longitude', 'userId'],
             where: {
                 title: req.params.title
@@ -70,7 +72,9 @@ exports.getOne = async (req, res, next) => {
 
         result = result.toJSON();
 
-        let results = await Climbs.findAll({
+        let sequelize = getSequelize();
+
+        let results = await Climb.findAll({
             attributes: [
                 'title', 'style', 'difficultyLevel',
                 [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
@@ -96,6 +100,7 @@ exports.getOne = async (req, res, next) => {
         result.climbs = climbs;
         result.styles = climbStyle;
         result.isCreator = validateAuthenticatedUser(req.user, result.userId);
+
         delete result.userId;
 
         res.status(200).json({
@@ -104,7 +109,6 @@ exports.getOne = async (req, res, next) => {
             result: result
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.details.place,
             cause: 'place_details'
@@ -114,7 +118,7 @@ exports.getOne = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try {
-        await Places.create(
+        await Place.create(
             {
                 title: req.body.title,
                 description: req.body.description,
@@ -142,7 +146,7 @@ exports.create = async (req, res, next) => {
 
 exports.getForUpdate = async (req, res, next) => {
     try {
-        let result = await Places.findOne({
+        let result = await Place.findOne({
             attributes: ['userId'],
             where: {
                 title: req.params.title
@@ -155,7 +159,7 @@ exports.getForUpdate = async (req, res, next) => {
             throwError(errors.auth.unauthorized, 'authentication', 403, false);
         }
 
-        let place = (await Places.findOne({
+        let place = (await Place.findOne({
             attributes: ['title', 'description', 'steps', 'latitude', 'longitude'],
             where: {
                 title: req.params.title
@@ -177,7 +181,7 @@ exports.getForUpdate = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
     try {
-        let result = await Places.findOne({
+        let result = await Place.findOne({
             attributes: ['id', 'userId'],
             where: {
                 title: req.params.title
@@ -215,7 +219,7 @@ exports.update = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
     try {
-        let place = await Places.findOne({
+        let place = await Place.findOne({
             attributes: ['id', 'title'],
             where: {
                 title: req.params.title
@@ -236,7 +240,6 @@ exports.delete = async (req, res, next) => {
             }
         });
     } catch (err) {
-        console.log(err);
         next(manageError(err, {
             code: errors.routes.delete.place,
             cause: 'delete_place'
