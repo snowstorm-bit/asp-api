@@ -1,0 +1,2073 @@
+{
+	"info": {
+		"_postman_id": "cd6a60c6-bf4a-4401-a0de-8834709fbd99",
+		"name": "API_ASP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18072721"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Authentication",
+					"item": [
+						{
+							"name": "Sad paths",
+							"item": [
+								{
+									"name": "/register",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"let fieldsToTestIndex = pm.variables.get(\"fieldsToTestIndex\") || 0;\r",
+													"\r",
+													"switch (fieldsToTestIndex) {\r",
+													"    case 0 :\r",
+													"        let usernameIndex = pm.variables.get(\"usernameIndex\") || 0;\r",
+													"        pm.variables.set(\"email\", '\"a@asp.ca\"');\r",
+													"        pm.variables.set(\"password\", '\"G@rn3@u!\"');\r",
+													"\r",
+													"        switch (usernameIndex) {\r",
+													"            case 0:\r",
+													"                pm.variables.set(\"username\", null);\r",
+													"                break;\r",
+													"            case 1:\r",
+													"                pm.variables.set(\"username\", '\"ab\"');\r",
+													"                break;\r",
+													"            case 2:\r",
+													"                pm.variables.set(\"username\", '\"\"');\r",
+													"                break;   \r",
+													"            case 3:\r",
+													"                pm.variables.set(\"username\", '\"    \"');\r",
+													"                break;\r",
+													"            case 4:\r",
+													"                pm.variables.set(\"username\", '\"Lorem Ipsum is simply dummy text of the printing and\"');\r",
+													"                break;\r",
+													"            case 5:\r",
+													"                pm.variables.set(\"username\", '\"123\"');\r",
+													"                break;\r",
+													"            case 6:\r",
+													"                pm.variables.set(\"username\", '\"___\"');\r",
+													"                break;    \r",
+													"            case 7:\r",
+													"                pm.variables.set(\"username\", '\"_$@#\"');\r",
+													"                break;    \r",
+													"            case 8:\r",
+													"                pm.variables.set(\"username\", '\"ab3\"');\r",
+													"                break;\r",
+													"        }\r",
+													"        break;\r",
+													"    case 1:\r",
+													"        let emailIndex = pm.variables.get(\"emailIndex\") || 0;\r",
+													"        pm.variables.set(\"username\", '\"utilisateur a\"');\r",
+													"        pm.variables.set(\"password\", '\"G@rn3@u!\"');\r",
+													"\r",
+													"        switch (emailIndex) {\r",
+													"            case 0:\r",
+													"                pm.variables.set(\"email\", null);\r",
+													"                break;\r",
+													"            case 1:\r",
+													"                pm.variables.set(\"email\", '\"\"');\r",
+													"                break;\r",
+													"            case 2:\r",
+													"                pm.variables.set(\"email\", '\"    \"');\r",
+													"                break;\r",
+													"            case 3:\r",
+													"                pm.variables.set(\"email\", '\"Lorem.Ipsum.is@simply.dummy.text.of.the.printing.and\"');\r",
+													"                break;\r",
+													"            case 4:\r",
+													"                pm.variables.set(\"email\", '\"a\"');\r",
+													"                break;\r",
+													"            case 5:\r",
+													"                pm.variables.set(\"email\", '\"a.\"');\r",
+													"                break;    \r",
+													"            case 6:\r",
+													"                pm.variables.set(\"email\", '\"a.@a.com\"');\r",
+													"                break;    \r",
+													"            case 7:\r",
+													"                pm.variables.set(\"email\", '\"a.a@.com\"');\r",
+													"                break;\r",
+													"            case 8:\r",
+													"                pm.variables.set(\"email\", '\"a.a@acom\"');\r",
+													"                break;\r",
+													"            case 9:\r",
+													"                pm.variables.set(\"email\", '\"a.a@a.\"');\r",
+													"                break;\r",
+													"            case 10:\r",
+													"                pm.variables.set(\"email\", '\"admin@asp.ca\"');\r",
+													"                break;\r",
+													"        }\r",
+													"        break;\r",
+													"    case 2:\r",
+													"        let passwordIndex = pm.variables.get(\"passwordIndex\") || 0;\r",
+													"        pm.variables.set(\"username\", '\"utilisateur a\"');\r",
+													"        pm.variables.set(\"email\", '\"a@asp.ca\"');\r",
+													"\r",
+													"        switch (passwordIndex) {\r",
+													"            case 0:\r",
+													"                pm.variables.set(\"password\", null);\r",
+													"                break;\r",
+													"            case 1:\r",
+													"                pm.variables.set(\"password\", '\"\"');\r",
+													"                break;\r",
+													"            case 2:\r",
+													"                pm.variables.set(\"password\", '\"    \"');\r",
+													"                break;\r",
+													"            case 3:\r",
+													"                pm.variables.set(\"password\", '\"aaaaa\"');\r",
+													"                break;\r",
+													"            case 4:\r",
+													"                pm.variables.set(\"password\", '\"aaaaaaaaaaaaa\"');\r",
+													"                break;    \r",
+													"            case 5:\r",
+													"                pm.variables.set(\"password\", '\"abcdef\"');\r",
+													"                break;    \r",
+													"        }\r",
+													"        break;\r",
+													"}"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"tests[\"Status code is 422\"] = responseCode.code === 422;\r",
+													"tests[\"Content-Type est JSON et UTF-8\"] = postman.getResponseHeader(\"Content-Type\") === \"application/json; charset=utf-8\";\r",
+													"\r",
+													"let fieldsToTestIndex = pm.variables.get(\"fieldsToTestIndex\") || 0;\r",
+													"postman.setNextRequest(pm.info.requestId);\r",
+													"\r",
+													"let code;\r",
+													"\r",
+													"switch (fieldsToTestIndex){\r",
+													"    case 0: { // validation on username\r",
+													"        let usernameIndex = pm.variables.get(\"usernameIndex\") || 0;\r",
+													"        let username = pm.variables.get(\"username\");\r",
+													"\r",
+													"        pm.variables.set(\"usernameIndex\", usernameIndex + 1);\r",
+													"\r",
+													"        let response = JSON.parse(responseBody);\r",
+													"        let usernameCode = response.codes.username;\r",
+													"\r",
+													"        switch (usernameIndex) {\r",
+													"            case 0:\r",
+													"                console.log('username validation');\r",
+													"                code = \"errors.fields.user.username.is_null\"\r",
+													"                tests[`Username : '${username}' error code should be : '${code}'`] = usernameCode === code;\r",
+													"                break;\r",
+													"            case 1:\r",
+													"                code = \"errors.fields.user.username.length\"\r",
+													"                tests[`Username : '${username}' error code should be : '${code}'`] = usernameCode === code;\r",
+													"                break;\r",
+													"            case 2:\r",
+													"                code = \"errors.fields.user.username.empty_or_white_spaces\"\r",
+													"                tests[`Username : '${username}' error code should be : '${code}'`] = usernameCode === code;\r",
+													"                break;\r",
+													"            case 3:\r",
+													"                code = \"errors.fields.user.username.empty_or_white_spaces\"\r",
+													"                tests[`Username : '${username}' error code should be : '${code}'`] = usernameCode === code;\r",
+													"                break;\r",
+													"            case 4:\r",
+													"                code = \"errors.fields.user.username.length\"\r",
+													"                tests[`Username : '${username}' error code should be : '${code}'`] = usernameCode === code;\r",
+													"                break;\r",
+													"            case 5:\r",
+													"                code = \"errors.fields.user.username.invalid\"\r",
+													"                tests[`Username : '${username}' error code should be : '${code}'`] = usernameCode === code;\r",
+													"                break;\r",
+													"            case 6:\r",
+													"                code = \"errors.fields.user.username.invalid\"\r",
+													"                tests[`Username : '${username}' error code should be : '${code}'`] = usernameCode === code;\r",
+													"                break;\r",
+													"            case 7:\r",
+													"                code = \"errors.fields.user.username.invalid\"\r",
+													"                tests[`Username : '${username}' error code should be : '${code}'`] = usernameCode === code;\r",
+													"                break;\r",
+													"            case 8:\r",
+													"                code = \"errors.fields.user.username.invalid\"\r",
+													"                tests[`Username : '${username}' error code should be : '${code}'`] = usernameCode === code;\r",
+													"                pm.variables.set(\"fieldsToTestIndex\", fieldsToTestIndex + 1)\r",
+													"                break;\r",
+													"        }\r",
+													"        break;\r",
+													"    }\r",
+													"    case 1: { // validation on username\r",
+													"        let emailIndex = pm.variables.get(\"emailIndex\") || 0;\r",
+													"        let email = pm.variables.get(\"email\");\r",
+													"\r",
+													"        pm.variables.set(\"emailIndex\", emailIndex + 1);\r",
+													"\r",
+													"        let response = JSON.parse(responseBody);\r",
+													"        let emailCode = response.codes?.email;\r",
+													"\r",
+													"        switch (emailIndex) {\r",
+													"            case 0:\r",
+													"                console.log('email validation');\r",
+													"                code = \"errors.fields.user.email.is_null\"\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                break;\r",
+													"            case 1:\r",
+													"                code = \"errors.fields.user.email.empty_or_white_spaces\"\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                break;\r",
+													"            case 2:\r",
+													"                code = \"errors.fields.user.email.empty_or_white_spaces\"\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                break;\r",
+													"            case 3:\r",
+													"                code = \"errors.fields.user.email.length_exceeded\"\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                break;\r",
+													"            case 4:\r",
+													"                code = \"errors.fields.user.email.invalid\"\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                break;\r",
+													"            case 5:\r",
+													"                code = \"errors.fields.user.email.invalid\"\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                break;\r",
+													"            case 6:\r",
+													"                code = \"errors.fields.user.email.invalid\"\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                break;\r",
+													"            case 7:\r",
+													"                code = \"errors.fields.user.email.invalid\"\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                break;\r",
+													"            case 8:\r",
+													"                code = \"errors.fields.user.email.invalid\"\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                break;\r",
+													"            case 9:\r",
+													"                code = \"errors.fields.user.email.invalid\"\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                break;\r",
+													"            case 10:\r",
+													"                code = \"errors.fields.user.email.already_taken\";\r",
+													"                tests[`Email : '${email}' error code should be : '${code}'`] = emailCode === code;\r",
+													"                pm.variables.set(\"fieldsToTestIndex\", fieldsToTestIndex + 1)\r",
+													"                break;\r",
+													"        }\r",
+													"        break;\r",
+													"    }\r",
+													"    case 2: {\r",
+													"        let passwordIndex = pm.variables.get(\"passwordIndex\") || 0;\r",
+													"        let password = pm.variables.get(\"password\");\r",
+													"\r",
+													"        pm.variables.set(\"passwordIndex\", passwordIndex + 1);\r",
+													"\r",
+													"        let response = JSON.parse(responseBody);\r",
+													"        let passwordCode = response.codes?.password;\r",
+													"\r",
+													"        switch (passwordIndex) {\r",
+													"            case 0:\r",
+													"                code = \"errors.fields.user.password.is_null\"\r",
+													"                tests[`Password : '${password}' error code should be : '${code}'`] = passwordCode === code;\r",
+													"                break;\r",
+													"            case 1:\r",
+													"                code = \"errors.fields.user.password.empty_or_white_spaces\"\r",
+													"                tests[`Password : '${password}' error code should be : '${code}'`] = passwordCode === code;\r",
+													"                break;\r",
+													"            case 2:\r",
+													"                code = \"errors.fields.user.password.empty_or_white_spaces\"\r",
+													"                tests[`Password : '${password}' error code should be : '${code}'`] = passwordCode === code;\r",
+													"                break;\r",
+													"            case 3:\r",
+													"                code = \"errors.fields.user.password.length\"\r",
+													"                tests[`Password : '${password}' error code should be : '${code}'`] = passwordCode === code;\r",
+													"                break;\r",
+													"            case 4:\r",
+													"                code = \"errors.fields.user.password.length\"\r",
+													"                tests[`Password : '${password}' error code should be : '${code}'`] = passwordCode === code;\r",
+													"                break;\r",
+													"            case 5:\r",
+													"                code =  [\r",
+													"                    'errors.fields.user.password.no_number',\r",
+													"                    'errors.fields.user.password.no_symbol',\r",
+													"                    'errors.fields.user.password.no_uppercase_letter'\r",
+													"                ];\r",
+													"                let codeIsValid = Array.isArray(passwordCode);\r",
+													"\r",
+													"                tests[`Password : '${password}' error code should contain no_number, no_symbol and no_uppercase_letter`] = codeIsValid;\r",
+													"                postman.setNextRequest();\r",
+													"                break;\r",
+													"        }\r",
+													"        break;\r",
+													"    }\r",
+													"}"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"username\": {{username}},\r\n    \"email\": {{email}},\r\n    \"password\": {{password}}\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/user/register",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"user",
+												"register"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/login",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+													"\r",
+													"switch (casesToTestIndex) {\r",
+													"    case 0 :\r",
+													"        pm.variables.set(\"email\", '\"m@s.ca\"');\r",
+													"        pm.variables.set(\"password\", '\"G@rn3@u!\"');\r",
+													"        break;\r",
+													"    case 1:\r",
+													"        pm.variables.set(\"email\", '\"a@asp.ca\"');\r",
+													"        pm.variables.set(\"password\", '\"A@1234\"');\r",
+													"        break;\r",
+													"}\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"tests[\"Status code is 422\"] = responseCode.code === 422;\r",
+													"tests[\"Content-Type est JSON et UTF-8\"] = postman.getResponseHeader(\"Content-Type\") === \"application/json; charset=utf-8\";\r",
+													"\r",
+													"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+													"\r",
+													"let response = JSON.parse(responseBody);\r",
+													"let code;\r",
+													"  \r",
+													"switch (casesToTestIndex){\r",
+													"    case 0:\r",
+													"        code = \"errors.fields.user.email.not_found\"\r",
+													"        tests[`Login error code should be : '${code}'`] = response.codes.email === code;\r",
+													"        pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+													"        postman.setNextRequest(pm.info.requestId);\r",
+													"        break;\r",
+													"    case 1:\r",
+													"        code = \"errors.fields.user.invalid\"\r",
+													"        tests[`Login error code should be : '${code}'`] = response.codes.login === code;\r",
+													"        postman.setNextRequest();\r",
+													"        break;\r",
+													"}\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"email\": {{email}},\r\n    \"password\": {{password}}\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/user/login",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"user",
+												"login"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											""
+										]
+									}
+								}
+							]
+						},
+						{
+							"name": "Happy paths",
+							"item": [
+								{
+									"name": "/register",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"tests[\"Status code is 201\"] = responseCode.code === 201;\r",
+													"tests[\"Content-Type est JSON et UTF-8\"] = postman.getResponseHeader(\"Content-Type\") === \"application/json; charset=utf-8\";\r",
+													"\r",
+													"let response = JSON.parse(responseBody);\r",
+													"\r",
+													"let code =\"successes.routes.register\";\r",
+													"tests[`Response body should contain code '${code}'`] = code === response.code\r",
+													"\r",
+													"\r",
+													"tests[`Response body result should contain 2 keys`] = Object.entries(response.result).length === 2;\r",
+													"\r",
+													"tests[`Response body result should contain username equals to 'bob martin'`] = response.result.username && response.result.username === \"bob martin\";\r",
+													"\r",
+													"tests[`Response body result should contain accessLevel equals to '1'`] = response.result.accessLevel && response.result.accessLevel === 1;\r",
+													"\r",
+													"\r",
+													"tests['Response body should contain token'] = 'token' in response;"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"username\": \"bob martin\",\r\n\t\"email\": \"m@s.com\",\r\n\t\"password\":\"A@1234\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/user/register",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"user",
+												"register"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/login",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"tests[\"Status code is 200\"] = responseCode.code === 200;\r",
+													"tests[\"Content-Type est JSON et UTF-8\"] = postman.getResponseHeader(\"Content-Type\") === \"application/json; charset=utf-8\";\r",
+													"\r",
+													"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+													"\r",
+													"let response = JSON.parse(responseBody);\r",
+													"  \r",
+													"switch (casesToTestIndex){\r",
+													"    case 0:\r",
+													"        postman.setEnvironmentVariable(\"user_token\", response.token);\r",
+													"        pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+													"        postman.setNextRequest(pm.info.requestId);\r",
+													"        break;\r",
+													"    case 1:\r",
+													"        postman.setEnvironmentVariable(\"admin_token\", response.token);\r",
+													"        postman.setNextRequest();\r",
+													"        break;\r",
+													"}"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+													"\r",
+													"switch (casesToTestIndex) {\r",
+													"    case 0 :\r",
+													"        pm.variables.set(\"email\", '\"a@asp.ca\"');\r",
+													"        break;\r",
+													"    case 1:\r",
+													"        pm.variables.set(\"email\", '\"admin@asp.ca\"');\r",
+													"        break;\r",
+													"}\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"email\": {{email}},\r\n\t\"password\":\"G@rn3@u!\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/user/login",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"user",
+												"login"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					],
+					"auth": {
+						"type": "noauth"
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "account",
+					"item": [
+						{
+							"name": "/profile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/user/account/profile",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"account",
+										"profile"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/profile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/user/account/profile",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"account",
+										"profile"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/climbs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/user/account/climbs",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"account",
+										"climbs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/places",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/user/account/places",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"account",
+										"places"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rates/climbs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/user/account/rates/climbs",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"user",
+										"account",
+										"rates",
+										"climbs"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{current_token}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;",
+									"",
+									"switch (casesToTestIndex) {",
+									"    case 0 :",
+									"        pm.environment.set(\"current_token\", '')",
+									"        break;",
+									"    case 1 :",
+									"        pm.environment.set(\"current_token\", pm.environment.get(\"expired_token\"));",
+									"        break;",
+									"    case 2:",
+									"        pm.environment.set(\"current_token\", pm.environment.get(\"user_token\"));",
+									"        break;",
+									"    case 3:",
+									"        pm.environment.set(\"current_token\", pm.environment.get(\"admin_token\"));",
+									"        break;",
+									"}"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Content-Type est JSON et UTF-8\"] = postman.getResponseHeader(\"Content-Type\") === \"application/json; charset=utf-8\";",
+									"",
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;",
+									"",
+									"let response = JSON.parse(responseBody);",
+									"let code;",
+									"",
+									"postman.setNextRequest(pm.info.requestId);",
+									"",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);",
+									"",
+									"switch (casesToTestIndex){",
+									"    case 0:",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;",
+									"        code = 'errors.auth.login_required'",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;",
+									"        break;",
+									"    case 1:",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;",
+									"        code = 'errors.auth.session_expired'",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;",
+									"        break;",
+									"    case 2:",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;",
+									"        break;",
+									"    case 3:",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;",
+									"        pm.variables.set(\"casesToTestIndex\", 0);",
+									"        postman.setNextRequest();",
+									"        break;",
+									"}",
+									""
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Place",
+			"item": [
+				{
+					"name": "/",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[\"Status code is 200\"] = responseCode.code === 200;\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[\"Status code is 200\"] = responseCode.code === 200;\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/place",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"place"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/place",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"place"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:title",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        pm.variables.set(\"casesToTestIndex\", 3);\r",
+									"\r",
+									"        let placeTitlesToTestIndex = pm.variables.get(\"placeTitlesToTestIndex\") || 0;\r",
+									"        pm.variables.set(\"placeTitlesToTestIndex\", placeTitlesToTestIndex + 1);\r",
+									"\r",
+									"        if (placeTitlesToTestIndex === 0 ){\r",
+									"            tests[\"Status code is 403\"] = responseCode.code === 403;\r",
+									"            code = 'errors.auth.unauthorized';\r",
+									"            tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        } else {\r",
+									"            tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"            pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"            pm.variables.set(\"placeTitlesToTestIndex\", 0)\r",
+									"            pm.globals.set(\"current_place_title\", pm.environment.get(\"user_place_title\"));\r",
+									"            postman.setNextRequest();\r",
+									"        }\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let placeTitlesToTestIndex = pm.variables.get(\"placeTitlesToTestIndex\") || 0;\r",
+									"\r",
+									"if (placeTitlesToTestIndex === 0 ){\r",
+									"    pm.globals.set(\"current_place_title\", pm.environment.get(\"user_place_title\"));\r",
+									"} else {\r",
+									"    pm.globals.set(\"current_place_title\", pm.environment.get(\"admin_place_title\"));\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/place/{{current_place_title}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"place",
+								"{{current_place_title}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:title",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        pm.variables.set(\"casesToTestIndex\", 3);\r",
+									"\r",
+									"        let placeTitlesToTestIndex = pm.variables.get(\"placeTitlesToTestIndex\") || 0;\r",
+									"        pm.variables.set(\"placeTitlesToTestIndex\", placeTitlesToTestIndex + 1);\r",
+									"\r",
+									"        if (placeTitlesToTestIndex === 0 ){\r",
+									"            tests[\"Status code is 403\"] = responseCode.code === 403;\r",
+									"            code = 'errors.auth.unauthorized';\r",
+									"            tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        } else {\r",
+									"            tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"            pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"            pm.globals.set(\"current_place_title\", pm.environment.get(\"user_place_title\"));\r",
+									"            postman.setNextRequest();\r",
+									"        }\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let placeTitlesToTestIndex = pm.variables.get(\"placeTitlesToTestIndex\") || 0;\r",
+									"\r",
+									"if (placeTitlesToTestIndex === 0 ){\r",
+									"    pm.globals.set(\"current_place_title\", pm.environment.get(\"user_place_title\"));\r",
+									"} else {\r",
+									"    pm.globals.set(\"current_place_title\", pm.environment.get(\"admin_place_title\"));\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/place/{{current_place_title}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"place",
+								"{{current_place_title}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/details/:title",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;\r",
+									"\r",
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = 'isCreator' in response.result && response.result.isCreator.authentication && response.result.isCreator.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = 'isCreator' in response.result && response.result.isCreator.authentication && response.result.isCreator.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should contain isCreator code equals to true`] = 'isCreator' in response.result && response.result.isCreator;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[`Response body should contain isCreator code equals to false`] = 'isCreator' in response.result && !response.result.isCreator;\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/place/details/{{current_place_title}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"place",
+								"details",
+								"{{current_place_title}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:title",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[\"Status code is 403\"] = responseCode.code === 403;\r",
+									"        code = 'errors.auth.unauthorized';\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/place/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"place",
+								"test"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{current_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;",
+							"",
+							"switch (casesToTestIndex) {",
+							"    case 0 :",
+							"        pm.environment.set(\"current_token\", '')",
+							"        break;",
+							"    case 1 :",
+							"        pm.environment.set(\"current_token\", pm.environment.get(\"expired_token\"));",
+							"        break;",
+							"    case 2:",
+							"        pm.environment.set(\"current_token\", pm.environment.get(\"user_token\"));",
+							"        break;",
+							"    case 3:",
+							"        pm.environment.set(\"current_token\", pm.environment.get(\"admin_token\"));",
+							"        break;",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Content-Type est JSON et UTF-8\"] = postman.getResponseHeader(\"Content-Type\") === \"application/json; charset=utf-8\";"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Climb",
+			"item": [
+				{
+					"name": "/",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/climb",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"climb"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/climb",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"climb"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:title",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        pm.variables.set(\"casesToTestIndex\", 3);\r",
+									"\r",
+									"        let climbTitlesToTestIndex = pm.variables.get(\"climbTitlesToTestIndex\") || 0;\r",
+									"        pm.variables.set(\"climbTitlesToTestIndex\", climbTitlesToTestIndex + 1);\r",
+									"\r",
+									"        if (climbTitlesToTestIndex === 0 ){\r",
+									"            tests[\"Status code is 403\"] = responseCode.code === 403;\r",
+									"            code = 'errors.auth.unauthorized';\r",
+									"            tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        } else {\r",
+									"            tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"            pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"            pm.variables.set(\"climbTitlesToTestIndex\", 0)\r",
+									"            pm.globals.set(\"current_climb_title\", pm.environment.get(\"user_climb_title\"));\r",
+									"            postman.setNextRequest();\r",
+									"        }\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let climbTitlesToTestIndex = pm.variables.get(\"climbTitlesToTestIndex\") || 0;\r",
+									"\r",
+									"if (climbTitlesToTestIndex === 0 ){\r",
+									"    pm.globals.set(\"current_climb_title\", pm.environment.get(\"user_climb_title\"));\r",
+									"        pm.globals.set(\"current_place_title\", `\"${pm.environment.get(\"user_place_title\")}\"`);\r",
+									"} else {\r",
+									"    pm.globals.set(\"current_climb_title\", pm.environment.get(\"admin_climb_title\"));\r",
+									"    pm.globals.set(\"current_place_title\", `\"${pm.environment.get(\"admin_place_title\")}\"`);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"placeTitle\": {{current_place_title}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/climb/{{current_climb_title}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"climb",
+								"{{current_climb_title}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:title",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        pm.variables.set(\"casesToTestIndex\", 3);\r",
+									"\r",
+									"        let climbTitlesToTestIndex = pm.variables.get(\"climbTitlesToTestIndex\") || 0;\r",
+									"        pm.variables.set(\"climbTitlesToTestIndex\", climbTitlesToTestIndex + 1);\r",
+									"\r",
+									"        if (climbTitlesToTestIndex === 0 ){\r",
+									"            tests[\"Status code is 403\"] = responseCode.code === 403;\r",
+									"            code = 'errors.auth.unauthorized';\r",
+									"            tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        } else {\r",
+									"            tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"            pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"            pm.globals.set(\"current_climb_title\", pm.environment.get(\"user_climb_title\"));\r",
+									"            postman.setNextRequest();\r",
+									"        }\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let climbTitlesToTestIndex = pm.variables.get(\"climbTitlesToTestIndex\") || 0;\r",
+									"\r",
+									"if (climbTitlesToTestIndex === 0 ){\r",
+									"    pm.globals.set(\"current_climb_title\", pm.environment.get(\"user_climb_title\"));\r",
+									"        pm.globals.set(\"current_place_title\", `\"${pm.environment.get(\"user_place_title\")}\"`);\r",
+									"} else {\r",
+									"    pm.globals.set(\"current_climb_title\", pm.environment.get(\"admin_climb_title\"));\r",
+									"    pm.globals.set(\"current_place_title\", `\"${pm.environment.get(\"admin_place_title\")}\"`);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"placeTitle\": {{current_place_title}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/climb/{{current_climb_title}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"climb",
+								"{{current_climb_title}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/details/:title",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;\r",
+									"\r",
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = 'isCreator' in response.result && response.result.isCreator.authentication && response.result.isCreator.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = 'isCreator' in response.result && response.result.isCreator.authentication && response.result.isCreator.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should contain isCreator code equals to true`] = 'isCreator' in response.result && response.result.isCreator;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[`Response body should contain isCreator code equals to false`] = 'isCreator' in response.result && !response.result.isCreator;\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/climb/details/{{current_climb_title}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"climb",
+								"details",
+								"{{current_climb_title}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/rate/:title",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/climb/rate/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"climb",
+								"rate",
+								"test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/rate/:title",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{base_url}}/climb/rate/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"climb",
+								"rate",
+								"test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;\r",
+									"\r",
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = 'isAuthInvalid' in response.result && response.result.isAuthInvalid.authentication && response.result.isAuthInvalid.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = 'isAuthInvalid' in response.result && response.result.isAuthInvalid.authentication && response.result.isAuthInvalid.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[`Response body should not contain isAuthInvalid code`] = !('isAuthInvalid' in response.result);\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[`Response body should not contain isAuthInvalid code`] = !('isAuthInvalid' in response.result);\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/climb/all?limit=12&offset=0&rate=&rate=5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"climb",
+								"all"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "12"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "difficultyLevel",
+									"value": "5.11",
+									"disabled": true
+								},
+								{
+									"key": "difficultyLevel",
+									"value": "5.12",
+									"disabled": true
+								},
+								{
+									"key": "rate",
+									"value": ""
+								},
+								{
+									"key": "rate",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:title",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;\r",
+									"pm.variables.set(\"casesToTestIndex\", casesToTestIndex + 1);\r",
+									"\r",
+									"let response = JSON.parse(responseBody);\r",
+									"let code;\r",
+									"\r",
+									"postman.setNextRequest(pm.info.requestId);\r",
+									"\r",
+									"switch (casesToTestIndex){\r",
+									"    case 0:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.login_required'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 1:\r",
+									"        tests[\"Status code is 401\"] = responseCode.code === 401;\r",
+									"        code = 'errors.auth.session_expired'\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 2:\r",
+									"        tests[\"Status code is 403\"] = responseCode.code === 403;\r",
+									"        code = 'errors.auth.unauthorized';\r",
+									"        tests[`Response body should contain authentication code equals to '${code}'`] = response.codes?.authentication && response.codes.authentication === code;\r",
+									"        break;\r",
+									"    case 3:\r",
+									"        tests[`Response body should not contain authentication code'`] = 'codes' in response ? !('authentication' in response.codes) : true;\r",
+									"        pm.variables.set(\"casesToTestIndex\", 0);\r",
+									"        postman.setNextRequest();\r",
+									"        break;\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/climb/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"climb",
+								"test"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{current_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"let casesToTestIndex = pm.variables.get(\"casesToTestIndex\") || 0;",
+							"",
+							"switch (casesToTestIndex) {",
+							"    case 0 :",
+							"        pm.environment.set(\"current_token\", '')",
+							"        break;",
+							"    case 1 :",
+							"        pm.environment.set(\"current_token\", pm.environment.get(\"expired_token\"));",
+							"        break;",
+							"    case 2:",
+							"        pm.environment.set(\"current_token\", pm.environment.get(\"user_token\"));",
+							"        break;",
+							"    case 3:",
+							"        pm.environment.set(\"current_token\", pm.environment.get(\"admin_token\"));",
+							"        break;",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Content-Type est JSON et UTF-8\"] = postman.getResponseHeader(\"Content-Type\") === \"application/json; charset=utf-8\";"
+						]
+					}
+				}
+			]
+		}
+	]
+}
