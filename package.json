@@ -7,19 +7,18 @@
 		"start": "node app.js",
 		"serve": "nodemon app.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-		"kill": "^C && O"
+		"lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/snowstorm-bit/asp.git"
+		"url": "git+https://github.com/snowstorm-bit/asp-api.git"
 	},
 	"author": "Melina Hotte",
 	"license": "ISC",
 	"bugs": {
-		"url": "https://github.com/snowstorm-bit/asp/issues"
+		"url": "https://github.com/snowstorm-bit/asp-api/issues"
 	},
-	"homepage": "https://github.com/snowstorm-bit/asp#readme",
+	"homepage": "https://github.com/snowstorm-bit/asp-api#readme",
 	"dependencies": {
 		"bcrypt": "^5.1.0",
 		"body-parser": "^1.20.1",
