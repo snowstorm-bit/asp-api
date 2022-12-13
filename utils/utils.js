@@ -5,7 +5,7 @@ const errors = require('../json/errors.json');
 const fs = require('fs');
 
 module.exports.validateAuthenticatedUser = (authenticatedUser, userIdToValidate) =>
-    authenticatedUser.authInvalid || authenticatedUser.id === userIdToValidate;
+    authenticatedUser?.authInvalid || authenticatedUser.id === userIdToValidate;
 
 module.exports.throwError = (code, cause = null, statusCode = null, isModelValidationError = true) => {
     let err = isModelValidationError

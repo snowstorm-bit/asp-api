@@ -67,4 +67,3 @@ app.listen(8080, async () => {
     console.log('App started. Listening on port 8080');
     await createSequelizeEntryPoint(await createDatabaseIfNotExists());
 });
-

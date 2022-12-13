@@ -11,7 +11,6 @@ const { getSequelize } = require('../database/config');
 const Climb = require('../classes/climb');
 const UserRates = require('../classes/userRates');
 
-
 exports.getAll = async (req, res, next) => {
     try {
         // trim query values
@@ -108,7 +107,7 @@ exports.getAll = async (req, res, next) => {
                 }
             ],
             where: where,
-            group: ['CLimb.id'],
+            group: ['Climb.id'],
             having: having,
             order: order
         };
@@ -167,8 +166,8 @@ exports.getAll = async (req, res, next) => {
             result.styles = climbStyle;
         }
 
-        if ('authInvalid' in req.user) {
-            result.isAuth = req.user.authInvalid;
+        if (req.user && 'authInvalid' in req.user) {
+            result.isAuthInvalid = req.user.authInvalid;
         }
 
         res.status(200).json({
@@ -303,18 +302,21 @@ exports.getOne = async (req, res, next) => {
 
         let sequelize = getSequelize();
 
+        let rateLiteralStatement = 'IF(UserRate.rate IS NULL, 0, AVG(UserRate.rate))';
+        let votesLiteralStatement = 'IF(UserRate.climb_id IS NULL, 0, COUNT(UserRate.climb_id))';
+
         let result = (await Climb.findOne({
             attributes: [
                 'title', 'description', 'style', 'difficultyLevel', 'images', 'userId',
-                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
-                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
+                [sequelize.literal(rateLiteralStatement), 'rate'],
+                [sequelize.literal(votesLiteralStatement), 'votes'],
                 [sequelize.col('Place.title'), 'placeTitle']
             ],
             include: [
                 {
                     model: UserRatesModel,
                     attributes: [],
-                    required: true
+                    required: false
                 },
                 {
                     model: Place,
@@ -325,7 +327,7 @@ exports.getOne = async (req, res, next) => {
             where: {
                 title: req.params.title
             },
-            group: ['UserRate.climb_id']
+            group: ['Climb.id']
         })).toJSON();
 
         if (req.user.id && req.user.accessLevel === 1) {
@@ -340,7 +342,12 @@ exports.getOne = async (req, res, next) => {
             result.userRate = userRate ? userRate.toJSON().rate : 0;
         }
 
-        result.isCreator = validateAuthenticatedUser(req.user, result.userId);
+        if (req.user) {
+            result.isCreator = validateAuthenticatedUser(req.user, result.userId);
+        } else {
+            result.isCreator = false;
+        }
+
         delete result.userId;
 
         res.status(200).json({
@@ -425,7 +432,6 @@ exports.create = async (req, res, next) => {
             }
         });
     } catch (err) {
-        console.log('error', err);
         next(manageError(err, {
             code: errors.routes.create.climb,
             cause: 'create_climb'

@@ -59,7 +59,7 @@ async function createAdminUser() {
         connection = await pool.getConnection();
 
         let insertStatement = 'INSERT INTO `users` (`id`, `username`, `email`, `password`, `access_level`, `createdAt`, `updatedAt`) VALUES';
-        let insertValues = `(1, 'admin', 'admin@asp.com', '${ hashPassword('G@rn3@u!') }', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`;
+        let insertValues = `(1, 'admin', 'admin@asp.ca', '${ hashPassword('G@rn3@u!') }', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`;
 
         let createAdminQuery = `${ insertStatement } ${ insertValues }`;
         await connection.query(createAdminQuery);

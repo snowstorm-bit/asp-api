@@ -74,21 +74,24 @@ exports.getOne = async (req, res, next) => {
 
         let sequelize = getSequelize();
 
+        let rateLiteralStatement = 'IF(UserRate.rate IS NULL, 0, AVG(UserRate.rate))';
+        let votesLiteralStatement = 'IF(UserRate.climb_id IS NULL, 0, COUNT(UserRate.climb_id))';
+
         let results = await Climb.findAll({
             attributes: [
                 'title', 'style', 'difficultyLevel',
-                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes'],
-                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate']
+                [sequelize.literal(rateLiteralStatement), 'rate'],
+                [sequelize.literal(votesLiteralStatement), 'votes']
             ],
             include: {
                 model: UserRates,
                 attributes: [],
-                required: true
+                required: false
             },
             where: {
                 placeId: result.id
             },
-            group: ['UserRate.climb_id'],
+            group: ['Climb.id'],
             order: [['title', 'ASC']]
         });
 
@@ -99,7 +102,12 @@ exports.getOne = async (req, res, next) => {
 
         result.climbs = climbs;
         result.styles = climbStyle;
-        result.isCreator = validateAuthenticatedUser(req.user, result.userId);
+
+        if (req.user) {
+            result.isCreator = validateAuthenticatedUser(req.user, result.userId);
+        } else {
+            result.isCreator = false;
+        }
 
         delete result.userId;
 

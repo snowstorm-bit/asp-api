@@ -36,21 +36,26 @@ module.exports.isAuth = (req, res, next) => {
                 if (decodedToken) {
                     req.user = decodedToken;
                 } else {
-                    req.user = { authInvalid: { status: 401, code: errors.auth.login_required } };
+                    req.user = { authInvalid: { status: 401, authentication: errors.auth.login_required } };
                 }
             } catch (err) {
                 req.user = {
                     authInvalid:
                         {
                             status: 401,
-                            code: err.name === 'TokenExpiredError'
+                            authentication: err.name === 'TokenExpiredError'
                                 ? errors.auth.session_expired
                                 : errors.auth.invalid
                         }
                 };
             }
+        } else {
+            req.user = { authInvalid: { status: 401, authentication: errors.auth.login_required } };
         }
+    } else {
+        req.user = { authInvalid: { status: 401, authentication: errors.auth.login_required } };
     }
+
     next();
 };
 
@@ -58,21 +63,6 @@ module.exports.isAuth = (req, res, next) => {
 module.exports.needsAuth = (req, res, next) => {
     try {
         req.user = decodeToken(req.get('Authorization'));
-        next();
-    } catch (err) {
-        throw manageError(err, {
-            code: errors.auth.invalid,
-            cause: 'authentication'
-        });
-    }
-};
-
-module.exports.needsUserAuth = (req, res, next) => {
-    try {
-        req.user = decodeToken(req.get('Authorization'));
-        if (req.user.accessLevel !== userAccessLevel.user) {
-            throwError(errors.auth.unauthorized, 'authentication', 403, false);
-        }
         next();
     } catch (err) {
         throw manageError(err, {

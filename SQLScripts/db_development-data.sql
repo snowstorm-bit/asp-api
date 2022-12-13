@@ -19,7 +19,8 @@ VALUES (1, 'Lieu a',
        (2, 'Lieu b', 'description', 'directives', 50, 50, 3, '2022-12-01 17:59:30', '2022-12-01 17:59:30'),
        (3, 'Lieu c', 'description', 'directives', 32, 92, 4, '2022-12-01 17:59:47', '2022-12-01 17:59:47'),
        (4, 'Lieu d', 'description', 'steps', -50, -20, 5, '2022-12-01 18:25:33', '2022-12-01 18:25:33'),
-       (5, 'Lieu e', 'description', 'steps', -20, -50, 6, '2022-12-01 18:25:33', '2022-12-01 18:25:33');
+       (5, 'Lieu e', 'description', 'steps', -20, -50, 6, '2022-12-01 18:25:33', '2022-12-01 18:25:33'),
+       (6, 'Lieu f', 'description', 'steps', -20, -50, 1, '2022-12-01 18:25:33', '2022-12-01 18:25:33');
 
 INSERT INTO `climbs` (`id`, `title`, `description`, `style`, `difficulty_level`, `images`, `place_id`, `user_id`,
                       `createdAt`, `updatedAt`)
@@ -53,7 +54,9 @@ VALUES (1, 'Grimpe a',
        (14, 'Grimpe n', 'Description', 'top_roping', '5.90', 'daylily-flower-and-buds-sharp.jpg', 5, 6,
         '2022-12-01 19:46:12', '2022-12-01 19:46:12'),
        (15, 'Grimpe o', 'Description', 'top_roping', '5.10', 'daylily-flower-and-buds-sharp.jpg', 5, 6,
-        '2022-12-01 19:46:12', '2022-12-01 19:46:12');
+        '2022-12-01 19:46:12', '2022-12-01 19:46:12'),
+       (16, 'Grimpe p', 'description', 'sport', '5.11', 'Top-Roping-1.jpg', 6, 1, '2022-12-01 18:25:33',
+        '2022-12-01 18:25:33');
 
 INSERT INTO `user_rates` (`user_id`, `climb_id`, `rate`)
 VALUES (2, 1, 1),
