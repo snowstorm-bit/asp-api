@@ -103,11 +103,9 @@ exports.getOne = async (req, res, next) => {
         result.climbs = climbs;
         result.styles = climbStyle;
 
-        if (req.user) {
-            result.isCreator = validateAuthenticatedUser(req.user, result.userId);
-        } else {
-            result.isCreator = false;
-        }
+        result.isCreator = req.user
+            ? validateAuthenticatedUser(req.user, result.userId)
+            : false;
 
         delete result.userId;
 

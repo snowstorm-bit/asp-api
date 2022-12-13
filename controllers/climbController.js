@@ -1,6 +1,5 @@
 'use strict';
 const { Op } = require('sequelize');
-const config = require('../database/config');
 const { throwError, manageError, round, paginateResponse, validateAuthenticatedUser } = require('../utils/utils');
 const { status, climbStyle } = require('../utils/enums');
 const errors = require('../json/errors.json');
@@ -147,8 +146,8 @@ exports.getAll = async (req, res, next) => {
             let findOneOptions = findOptions;
             findOneOptions.attributes = [
                 'title',
-                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
-                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
+                [sequelize.literal(rateLiteralStatement), 'rate'],
+                [sequelize.literal(votesLiteralStatement), 'votes']
             ];
             findOneOptions.offset = result.offset;
 
@@ -330,7 +329,7 @@ exports.getOne = async (req, res, next) => {
             group: ['Climb.id']
         })).toJSON();
 
-        if (req.user.id && req.user.accessLevel === 1) {
+        if (req.user?.id) {
             let userRate = await UserRates.findOne({
                 attributes: ['rate'],
                 where: {
@@ -339,14 +338,12 @@ exports.getOne = async (req, res, next) => {
                 }
             });
 
-            result.userRate = userRate ? userRate.toJSON().rate : 0;
+            result.userRate = userRate ? userRate.rate : 0;
         }
 
-        if (req.user) {
-            result.isCreator = validateAuthenticatedUser(req.user, result.userId);
-        } else {
-            result.isCreator = false;
-        }
+        result.isCreator = req.user
+            ? validateAuthenticatedUser(req.user, result.userId)
+            : false;
 
         delete result.userId;
 
@@ -596,7 +593,7 @@ exports.rateOne = async (req, res, next) => {
                 {
                     model: UserRatesModel,
                     attributes: [],
-                    required: true
+                    required: false
                 }
             ],
             where: {
@@ -616,10 +613,13 @@ exports.rateOne = async (req, res, next) => {
 
         let sequelize = getSequelize();
 
+        let rateLiteralStatement = 'IF(UserRate.rate IS NULL, 0, AVG(UserRate.rate))';
+        let votesLiteralStatement = 'IF(UserRate.climb_id IS NULL, 0, COUNT(UserRate.climb_id))';
+
         climb = (await Climb.findOne({
             attributes: [
-                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
-                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
+                [sequelize.literal(rateLiteralStatement), 'rate'],
+                [sequelize.literal(votesLiteralStatement), 'votes']
             ],
             include: [
                 {
@@ -679,16 +679,19 @@ exports.deleteOneRate = async (req, res, next) => {
 
         let sequelize = getSequelize();
 
+        let rateLiteralStatement = 'IF(UserRate.rate IS NULL, 0, AVG(UserRate.rate))';
+        let votesLiteralStatement = 'IF(UserRate.climb_id IS NULL, 0, COUNT(UserRate.climb_id))';
+
         climb = (await Climb.findOne({
             attributes: [
-                [sequelize.fn('AVG', sequelize.col('UserRate.rate')), 'rate'],
-                [sequelize.fn('COUNT', sequelize.col('UserRate.climb_id')), 'votes']
+                [sequelize.literal(rateLiteralStatement), 'rate'],
+                [sequelize.literal(votesLiteralStatement), 'votes']
             ],
             include: [
                 {
                     model: UserRatesModel,
                     attributes: [],
-                    required: true
+                    required: false
                 }
             ],
             where: {
@@ -705,6 +708,7 @@ exports.deleteOneRate = async (req, res, next) => {
             result: climb
         });
     } catch (err) {
+        console.log(err);
         next(manageError(err, {
             code: errors.routes.rate.climb,
             cause: 'rate_climb'
